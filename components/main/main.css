@@ -1,0 +1,32 @@
+.main-container {
+  @apply m-auto w-full h-fit my-60;
+  max-width: 900px;
+  /* min-height: ; */
+}
+
+.greet {
+  @apply font-semibold px-5 text-5xl flex flex-col items-center mt-11 mb-4 text-center sm:text-6xl;
+
+  color: #c4c7c5;
+}
+
+.greet .desc {
+  @apply sm:text-4xl font-medium text-3xl;
+}
+
+.main-container .greet span {
+  /* background: -webkit-linear-gradient(16deg, #4b90ff, #fc6a5d); */
+  /* background: linear-gradient(to right, #050505, #064702, #16fa07); */
+  background: linear-gradient(to right, #ff0000, #ff6600, #ffa500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: greet 2s linear;
+}
+@keyframes greet {
+  0% {
+    background-position: -400px 0px;
+  }
+  100% {
+    background-position: 600px 0px;
+  }
+}
