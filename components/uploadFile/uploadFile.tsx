@@ -36,7 +36,7 @@ const FileUploadForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 w-64">
       <div>
         <label
           htmlFor="fileType"
