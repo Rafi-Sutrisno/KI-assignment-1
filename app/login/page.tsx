@@ -11,8 +11,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-[100vh] w-100 bg-white justify-center items-center">
-      <div className="flex justify-center items-center w-3/4 h-fit ">
+    <div className="flex min-h-[100vh] w-100 bg-white justify-center items-center">
+      <div className="flex justify-center items-center w-3/4 h-fit my-20">
         <ul className="flex flex-col gap-4 bg-white w-1/4 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
           <li>
             <button onClick={() => showPage("login")}>Login</button>
