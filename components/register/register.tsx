@@ -1,13 +1,32 @@
+"use client";
 import Image from "next/image";
 import { useState } from "react";
 
 export function Register() {
   const [phone, setPhone] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/^0/, ""); // Remove leading 0
     setPhone(value);
   };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setSelectedFile(event.target.files[0]);
+    }
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (selectedFile) {
+      // Handle file submission logic
+      console.log("File:", selectedFile);
+    } else {
+      console.error("No file selected");
+    }
+  };
+
   return (
     <div className="flex min-h-full flex-col justify-center w-3/4">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -18,13 +37,13 @@ export function Register() {
           src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
           alt="Your Company"
         />
-        <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+        <h2 className="mt-2 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
           Register your account
         </h2>
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6" action="#">
+        <form className="space-y-6" action="#" onSubmit={handleSubmit}>
           <div>
             <label
               htmlFor="fullname"
@@ -55,17 +74,36 @@ export function Register() {
                 +62
               </span>
               <input
-                type="text"
+                type="number"
                 name="phone"
                 id="phone"
                 value={phone}
                 onChange={handlePhoneChange}
-                className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-r-md text-black"
+                className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholder="81234567890" // No leading 0
+                onInput={(e) => {
+                  e.currentTarget.value = e.currentTarget.value.replace(
+                    /[^0-9]/g,
+                    ""
+                  );
+                }}
                 required
               />
             </div>
           </div>
+
+          <label
+            htmlFor="adddress"
+            className="block mb-2 text-sm font-medium text-black"
+          >
+            Address
+          </label>
+          <textarea
+            id="address"
+            rows={4}
+            className="block p-2.5 w-full text-sm rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            placeholder="Type your address"
+          ></textarea>
 
           <div>
             <label
@@ -114,24 +152,29 @@ export function Register() {
           </div>
 
           <div>
+            <label
+              htmlFor="fileUpload"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Upload File
+            </label>
+            <input
+              id="file_input"
+              type="file"
+              onChange={handleFileChange}
+              className=""
+            />
+          </div>
+
+          <div>
             <button
               type="submit"
               className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Sign in
+              Register
             </button>
           </div>
         </form>
-
-        <p className="mt-10 text-center text-sm text-gray-500">
-          Not a member?
-          <a
-            href="#"
-            className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
-          >
-            Start a 14 day free trial
-          </a>
-        </p>
       </div>
     </div>
   );
