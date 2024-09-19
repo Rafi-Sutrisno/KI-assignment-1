@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const Navbar = () => {
   return (
     <nav className="fixed w-full z-20 top-0 start-0 border-b bg-white">
@@ -46,21 +48,20 @@ const Navbar = () => {
         >
           <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium border rounded-lg  md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 ">
             <li>
-              <a
-                href="#"
-                className="block py-2 px-3 text-black hover:bg-red-50 md:hover:bg-transparent md:hover:text-red-600 md:p-0 md:dark:hover:text-red-500 dark:text-white dark:hover:bg-red-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-red-700"
-                aria-current="page"
+              <Link
+                href={"/"}
+                className="block py-2 px-3 text-black rounded hover:bg-red-50 md:hover:bg-transparent md:hover:text-red-600 md:p-0 md:dark:hover:text-red-500 dark:text-white dark:hover:bg-red-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-red-700"
               >
                 Home
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="#"
+              <Link
+                href={"/upload"}
                 className="block py-2 px-3 text-black rounded hover:bg-red-50 md:hover:bg-transparent md:hover:text-red-600 md:p-0 md:dark:hover:text-red-500 dark:text-white dark:hover:bg-red-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-red-700"
               >
                 Upload
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
