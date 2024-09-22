@@ -1,8 +1,10 @@
 "use client";
-import Login from "@/components/login/login";
+import { Login } from "@/components/login/login";
 import { Register } from "@/components/register/register";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createUser } from "@/actions/actions";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [selected, setSelected] = useState<string>("login");
@@ -13,6 +15,31 @@ export default function LoginPage() {
 
   const changePage = (target: string) => {
     router.push(target);
+  };
+
+  const handleSubmitRegister = async (
+    event: React.FormEvent,
+    selectedFile: File
+  ) => {
+    event.preventDefault();
+
+    const form = event.currentTarget as HTMLFormElement;
+    const formData = new FormData(form);
+
+    if (selectedFile) {
+      formData.append("file", selectedFile);
+
+      try {
+        await createUser(formData);
+        setSelected("login");
+        toast.success("success to register.");
+      } catch (error) {
+        console.log(error);
+        toast.error("failed to register");
+      }
+    } else {
+      console.error("No file selected");
+    }
   };
 
   return (
@@ -43,9 +70,15 @@ export default function LoginPage() {
           </div>
         </ul>
         <div className="w-3/4 flex justify-center items-center">
-          {selected === "login" && <Login />}
+          {selected === "login" && (
+            <Login change={changePage} setSelect={setSelected} />
+          )}
           {selected === "register" && (
-            <Register change={changePage} setSelect={setSelected} />
+            <Register
+              change={changePage}
+              setSelect={setSelected}
+              handleSubmit={handleSubmitRegister}
+            />
           )}
         </div>
       </div>

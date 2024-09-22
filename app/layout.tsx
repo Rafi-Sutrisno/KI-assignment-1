@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
 import { Toaster } from "react-hot-toast";
+import TokenContextProvider from "@/components/Provider/TokenProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,10 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Toaster position="top-right" reverseOrder={false} />
-        <Navbar />
-        <div>{children}</div>
-        <Footer />
+        <TokenContextProvider>
+          <Toaster position="top-right" reverseOrder={false} />
+          <Navbar />
+          <div>{children}</div>
+          <Footer />
+        </TokenContextProvider>
       </body>
     </html>
   );
