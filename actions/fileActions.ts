@@ -38,3 +38,17 @@ export async function uploadFile(formData: FormData, token: string) {
     console.error("error saving file:", error);
   }
 }
+
+export async function getFiles(token: string) {
+  const decodedToken = atob(token.split(".")[1]);
+  const jsonObject = JSON.parse(decodedToken);
+  const userId = jsonObject.id;
+
+  const files = await prisma.userFiles.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+
+  return files;
+}
