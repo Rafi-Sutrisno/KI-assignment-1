@@ -1,7 +1,26 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { Context } from "../Provider/TokenProvider";
+import { useContext } from "react";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
+  const context = useContext(Context);
+
+  if (!context) {
+    throw new Error("Context must be used within a ContextProvider");
+  }
+
+  const { getToken, resetToken } = context;
+
+  const logOut = () => {
+    resetToken;
+    toast.success("success to logout.");
+    window.location.reload();
+  };
+
   return (
     <nav className="fixed w-full z-20 top-0 start-0 border-b bg-white dark:bg-black">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -18,12 +37,36 @@ const Navbar = () => {
           </span>
         </a>
         <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-          <Link
-            href={"/login"}
-            className="text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-          >
-            Get Started
-          </Link>
+          {getToken() ? (
+            <>
+              <div className="flex items-center">
+                <Link
+                  href={"/"}
+                  className="text-white bg-gray-700 hover:bg-gray-600 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:focus:ring-gray-400"
+                  onClick={logOut}
+                >
+                  Log Out
+                </Link>
+                <Image
+                  src="/assets/boy.png" // Replace with your profile picture URL
+                  alt="Profile Picture"
+                  width={50} // Adjust size as needed
+                  height={50} // Adjust size as needed
+                  className="ml-3 rounded-full border-2 border-gray-400" // Adds margin and border
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <Link
+                href={"/login"}
+                className="text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
+
           <button
             data-collapse-toggle="navbar-sticky"
             type="button"

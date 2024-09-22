@@ -1,7 +1,9 @@
 "use server";
 
-import { arrayBufferToBuffer, encrypt } from "@/components/encryptions/aes";
 import prisma from "@/lib/db";
+import { UserLoginParams } from "@/interface/user";
+import jwt from "jsonwebtoken";
+import { arrayBufferToBuffer, encrypt } from "@/components/encryptions/aes";
 
 export async function createUser(formData: FormData) {
   const userData = {
@@ -29,4 +31,33 @@ export async function createUser(formData: FormData) {
   });
 
   return { user, userFile };
+}
+
+export async function userLogin(params: UserLoginParams) {
+  const { email, password } = params;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (user.password !== password) {
+    throw new Error("Invalid password");
+  }
+
+  const token = jwt.sign(
+    {
+      email: user.email,
+      password: user.password,
+    },
+    process.env.JWT_KEY as string,
+    { expiresIn: "1h" }
+  );
+
+  return { token };
 }

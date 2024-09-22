@@ -1,7 +1,45 @@
 "use client";
 import Image from "next/image";
+import { userLogin } from "@/actions/actions";
+import { Dispatch, SetStateAction, useContext } from "react";
+import toast from "react-hot-toast";
+import { Context } from "../Provider/TokenProvider";
 
-export default function Login() {
+interface RegisterProps {
+  change: (target: string) => void;
+  setSelect: Dispatch<SetStateAction<string>>;
+}
+
+export const Login: React.FC<RegisterProps> = ({ change, setSelect }) => {
+  const context = useContext(Context);
+
+  if (!context) {
+    throw new Error("Context must be used within a ContextProvider");
+  }
+
+  const { setToken } = context;
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const form = event.currentTarget as HTMLFormElement;
+    const formData = new FormData(form);
+
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const token = await userLogin({ email, password });
+      change("/");
+      toast.success("success to login.");
+      console.log(token);
+      setToken(token.token);
+    } catch (error) {
+      console.log(error);
+      toast.error("failed to login");
+    }
+  };
+
   return (
     <div className="flex min-h-full flex-col justify-center w-3/4">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -18,7 +56,7 @@ export default function Login() {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6" action="#" method="POST">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label
               htmlFor="email"
@@ -79,4 +117,4 @@ export default function Login() {
       </div>
     </div>
   );
-}
+};

@@ -7,9 +7,14 @@ import toast from "react-hot-toast";
 interface RegisterProps {
   change: (target: string) => void; // Define the type for the change prop
   setSelect: Dispatch<SetStateAction<string>>;
+  handleSubmit: (event: React.FormEvent, selectedFile: File) => Promise<void>;
 }
 
-export const Register: React.FC<RegisterProps> = ({ change, setSelect }) => {
+export const Register: React.FC<RegisterProps> = ({
+  change,
+  setSelect,
+  handleSubmit,
+}) => {
   const [phone, setPhone] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -24,25 +29,12 @@ export const Register: React.FC<RegisterProps> = ({ change, setSelect }) => {
     }
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
-    const form = event.currentTarget as HTMLFormElement;
-    const formData = new FormData(form);
-
     if (selectedFile) {
-      formData.append("file", selectedFile);
-
-      try {
-        await createUser(formData);
-        setSelect("login");
-        toast.success("success to register.");
-      } catch (error) {
-        console.log(error);
-        toast.error("failed to register");
-      }
+      await handleSubmit(event, selectedFile);
     } else {
-      console.error("No file selected");
+      toast.error("Please select a file to upload.");
     }
   };
 
@@ -62,7 +54,7 @@ export const Register: React.FC<RegisterProps> = ({ change, setSelect }) => {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={onSubmit}>
           <div className="flex flex-col gap-3">
             <div>
               <label
