@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const Footer = () => {
   return (
     <footer className=" rounded-lg shadow dark:bg-gray-900 m-4">
@@ -7,13 +9,15 @@ const Footer = () => {
             href="/"
             className="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
           >
-            <img
+            <Image
               src="/assets/bonfire.png"
               className="h-9 rounded-full "
               alt="Flowbite Logo"
+              width={36}
+              height={36}
             />
             <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-              Assigment 1
+              Assignment 1
             </span>
           </a>
           <ul className="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400">
