@@ -52,10 +52,9 @@ export async function userLogin(params: UserLoginParams) {
 
   const token = jwt.sign(
     {
-      email: user.email,
-      password: user.password,
+      id: user.id,
     },
-    process.env.JWT_KEY as string,
+    process.env.NEXT_PUBLIC_JWT_KEY as string,
     { expiresIn: "1h" }
   );
 
