@@ -1,18 +1,16 @@
-import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
+import { createCipheriv, createDecipheriv } from "crypto";
 
 const algorithm = "aes-256-cbc";
 
-// generate random secure key
-const key = randomBytes(32);
-
-// generate vector initialization
-const iv = randomBytes(16);
+// get secret encryption key from env
+const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_KEY;
+const key = Buffer.from(encryptionKeyHex!, "hex");
 
 export function arrayBufferToBuffer(arrayBuffer: ArrayBuffer): Buffer {
   return Buffer.from(new Uint8Array(arrayBuffer));
 }
 
-export function encrypt(file: Buffer): Buffer {
+export function encrypt(file: Buffer, iv: Buffer): Buffer {
   const cipher = createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(file);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
@@ -20,7 +18,7 @@ export function encrypt(file: Buffer): Buffer {
   return encrypted;
 }
 
-export function decrypt(encryptedFile: Buffer): Buffer {
+export function decrypt(encryptedFile: Buffer, iv: Buffer): Buffer {
   const decipher = createDecipheriv(algorithm, key, iv);
 
   // Decrypt the encrypted data
