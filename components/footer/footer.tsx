@@ -27,26 +27,17 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a
-                href="https://github.com/Rafi-Sutrisno"
-                className="hover:underline me-4 md:me-6"
-              >
+              <a href="" className="hover:underline me-4 md:me-6">
                 Github
               </a>
             </li>
             <li>
-              <a
-                href="https://www.linkedin.com/in/rafisutrisno/"
-                className="hover:underline me-4 md:me-6"
-              >
+              <a href="" className="hover:underline me-4 md:me-6">
                 Linkedin
               </a>
             </li>
             <li>
-              <a
-                href="https://instagram.com/rafisutrisno_"
-                className="hover:underline"
-              >
+              <a href="" className="hover:underline">
                 Instagram
               </a>
             </li>

@@ -2,10 +2,6 @@
 
 import prisma from "@/lib/db";
 import { arrayBufferToBuffer, encrypt } from "@/components/encryptions/aes";
-import jwt from "jsonwebtoken";
-import * as jwt_decode from "jwt-decode";
-import { equal } from "assert";
-import { use } from "react";
 
 export async function uploadFile(formData: FormData, token: string) {
   const secretKey = "testingkey"; // Use the non-public key
