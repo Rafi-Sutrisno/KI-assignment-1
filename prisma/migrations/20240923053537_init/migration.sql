@@ -16,6 +16,7 @@ CREATE TABLE "UserFiles" (
     "userId" TEXT NOT NULL,
     "fileType" TEXT NOT NULL,
     "aes_encrypted" BYTEA NOT NULL,
+    "aes_iv" BYTEA NOT NULL,
     "rc4_encrypted" BYTEA NOT NULL,
     "des_encrypted" BYTEA NOT NULL,
 
