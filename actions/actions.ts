@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { UserLoginParams } from "@/interface/user";
 import jwt from "jsonwebtoken";
 import { arrayBufferToBuffer, encrypt } from "@/components/encryptions/aes";
+import { randomBytes } from "crypto";
 
 export async function createUser(formData: FormData) {
   const userData = {
@@ -17,6 +18,7 @@ export async function createUser(formData: FormData) {
   const file = formData.get("file_input") as File;
   const arrayBuffer = await file.arrayBuffer();
   const bufferFile = arrayBufferToBuffer(arrayBuffer);
+  const iv = randomBytes(16); // put iv on each files
 
   const user = await prisma.user.create({ data: userData });
 
@@ -24,7 +26,8 @@ export async function createUser(formData: FormData) {
     data: {
       userId: user.id, // Use the ID from the created user
       fileType: file.type,
-      aes_encrypted: encrypt(bufferFile),
+      aes_encrypted: encrypt(bufferFile, iv),
+      aes_iv: iv,
       rc4_encrypted: Buffer.from("dummy_aes_encrypted_data"),
       des_encrypted: Buffer.from("dummy_aes_encrypted_data"),
     },

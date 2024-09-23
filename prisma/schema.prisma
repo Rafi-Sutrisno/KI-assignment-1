@@ -23,6 +23,7 @@ model UserFiles {
   userId        String
   fileType      String
   aes_encrypted Bytes
+  aes_iv        Bytes
   rc4_encrypted Bytes
   des_encrypted Bytes
   
