@@ -1,0 +1,84 @@
+"use server";
+
+import prisma from "@/lib/db";
+import { arrayBufferToBuffer, encrypt } from "@/components/encryptions/aes";
+import jwt from "jsonwebtoken";
+import * as jwt_decode from "jwt-decode";
+import { equal } from "assert";
+import { use } from "react";
+
+export async function uploadFile(formData: FormData, token: string) {
+  const secretKey = "testingkey"; // Use the non-public key
+
+  if (!token) {
+    throw new Error("Token is required for authentication");
+  }
+  console.log("secretkey:", secretKey);
+  console.log("token:", token);
+  try {
+    const decodedToken = atob(token.split(".")[1]);
+    const jsonObject = JSON.parse(decodedToken);
+    const userId = jsonObject.id;
+    console.log(userId);
+
+    const file = formData.get("file_input") as File;
+    const arrayBuffer = await file.arrayBuffer();
+    const bufferFile = arrayBufferToBuffer(arrayBuffer);
+
+    const userFile = await prisma.userFiles.create({
+      data: {
+        userId: userId,
+        fileType: file.type,
+        aes_encrypted: Buffer.from("dummy_aes_encrypted_data"),
+        rc4_encrypted: Buffer.from("dummy_aes_encrypted_data"),
+        des_encrypted: Buffer.from("dummy_aes_encrypted_data"),
+      },
+    });
+
+    return userFile;
+  } catch (error) {
+    console.error("error saving file:", error);
+  }
+}
+
+export async function getFiles(token: string) {
+  const decodedToken = atob(token.split(".")[1]);
+  const jsonObject = JSON.parse(decodedToken);
+  const userId = jsonObject.id;
+
+  const files = await prisma.userFiles.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+
+  return files;
+}
+
+export async function deleteFiles(token: string, idFile: string) {
+  try {
+    const decodedToken = atob(token.split(".")[1]);
+    const jsonObject = JSON.parse(decodedToken);
+    const userId = jsonObject.id;
+
+    const userFile = await prisma.userFiles.findUnique({
+      where: { id: idFile },
+    });
+
+    if (!userFile) {
+      throw new Error("file not found");
+    }
+
+    if (userFile.userId === userId) {
+      const deletedFile = await prisma.userFiles.delete({
+        where: { id: idFile },
+      });
+
+      return deletedFile;
+    } else {
+      throw new Error("you are not authorized to delete this file");
+    }
+  } catch (error) {
+    console.error("error deleting file:", error);
+  }
+}
