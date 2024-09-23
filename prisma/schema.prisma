@@ -22,6 +22,7 @@ model UserFiles {
   id            String @id @default(cuid())
   userId        String
   fileType      String
+  fileName      String
   aes_encrypted Bytes
   aes_iv        Bytes
   rc4_encrypted Bytes

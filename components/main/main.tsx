@@ -1,6 +1,5 @@
 "use client";
 import "./Main.css";
-import { decrypt } from "../encryptions/aes";
 
 const Main = () => {
   return (

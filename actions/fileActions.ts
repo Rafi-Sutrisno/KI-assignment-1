@@ -27,6 +27,7 @@ export async function uploadFile(formData: FormData, token: string) {
       data: {
         userId: userId,
         fileType: file.type,
+        fileName: file.name,
         aes_encrypted: encrypt(bufferFile, iv),
         aes_iv: iv,
         rc4_encrypted: Buffer.from("dummy_aes_encrypted_data"),
