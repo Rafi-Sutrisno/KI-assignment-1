@@ -3,6 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import Card from "./card";
 import { getFiles } from "@/actions/fileActions";
 import { Context } from "../Provider/TokenProvider";
+import { deleteFiles } from "@/actions/fileActions";
+import toast from "react-hot-toast";
 
 const AllFiles = () => {
   const [files, setFiles] = useState<any[]>([]);
@@ -28,13 +30,31 @@ const AllFiles = () => {
     fetchFiles();
   }, [token]);
 
+  const handleDelete = async (idFile: string) => {
+    try {
+      if (token) {
+        await deleteFiles(token, idFile);
+        setFiles((prevFiles) => prevFiles.filter((file) => file.id !== idFile)); // Remove file from the list
+        console.log("file deleted successfully");
+        toast.success("file deleted succesfully");
+      }
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+    }
+  };
+
   return (
     <div className="flex flex-wrap gap-4">
       {token ? (
         <>
           {files.length > 0 ? (
             files.map((file) => (
-              <Card key={file.id} fileType={file.fileType} fileID={file.id} />
+              <Card
+                key={file.id}
+                fileType={file.fileType}
+                fileID={file.id}
+                handleDelete={handleDelete}
+              />
             ))
           ) : (
             <div
