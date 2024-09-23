@@ -24,7 +24,7 @@ export async function createUser(formData: FormData) {
 
   const userFile = await prisma.userFiles.create({
     data: {
-      userId: user.id, // Use the ID from the created user
+      userId: user.id,
       fileType: file.type,
       aes_encrypted: encrypt(bufferFile, iv),
       aes_iv: iv,

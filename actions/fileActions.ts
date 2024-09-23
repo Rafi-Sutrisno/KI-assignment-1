@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/db";
 import { arrayBufferToBuffer, encrypt } from "@/components/encryptions/aes";
+import { randomBytes } from "crypto";
 
 export async function uploadFile(formData: FormData, token: string) {
   const secretKey = "testingkey"; // Use the non-public key
@@ -20,12 +21,14 @@ export async function uploadFile(formData: FormData, token: string) {
     const file = formData.get("file_input") as File;
     const arrayBuffer = await file.arrayBuffer();
     const bufferFile = arrayBufferToBuffer(arrayBuffer);
+    const iv = randomBytes(16);
 
     const userFile = await prisma.userFiles.create({
       data: {
         userId: userId,
         fileType: file.type,
-        aes_encrypted: Buffer.from("dummy_aes_encrypted_data"),
+        aes_encrypted: encrypt(bufferFile, iv),
+        aes_iv: iv,
         rc4_encrypted: Buffer.from("dummy_aes_encrypted_data"),
         des_encrypted: Buffer.from("dummy_aes_encrypted_data"),
       },
