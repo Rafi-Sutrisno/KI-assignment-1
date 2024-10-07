@@ -28,7 +28,7 @@ export async function createUser(formData: FormData) {
     // income_DES: encryptDES(income, iv) as string,
 
     health_data_RC4: formData.get("health_data") as string,
-    income_DES: encryptDES(income, randomBytes(8)) as string,
+    income_DES: income as string,
     des_iv: iv,
   };
 

@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { useContext, useEffect, useState } from "react";
 import { Context } from "../Provider/TokenProvider";

@@ -47,13 +47,15 @@ const Navbar = () => {
                 >
                   Log Out
                 </Link>
-                <Image
-                  src="/assets/boy.png" // Replace with your profile picture URL
-                  alt="Profile Picture"
-                  width={50} // Adjust size as needed
-                  height={50} // Adjust size as needed
-                  className="ml-3 rounded-full border-2 border-gray-400" // Adds margin and border
-                />
+                <Link href="/profile">
+                  <Image
+                    src="/assets/boy.png"
+                    alt="Profile Picture"
+                    width={50}
+                    height={50}
+                    className="ml-3 rounded-full border-2 border-gray-400 cursor-pointer"
+                  />
+                </Link>
               </div>
             </>
           ) : (
