@@ -6,25 +6,25 @@ import jwt from "jsonwebtoken";
 import { arrayBufferToBuffer, encryptAES } from "@/components/encryptions/aes";
 import { randomBytes } from "crypto";
 import { encryptRC4 } from "@/components/encryptions/rc4";
+import { encryptDES } from "@/components/encryptions/des";
 
 export async function createUser(formData: FormData) {
-  let phoneNumber = formData.get("phone") as string;
-  if (!phoneNumber.startsWith("+62")) {
-    phoneNumber = "+62" + phoneNumber;
-  }
+  const iv = randomBytes(16); // put iv on each files
+  const income = ((formData.get("income-1") as string) +
+    formData.get("income-2")) as string;
 
   const userData = {
-    name: formData.get("name") as string,
-    email: formData.get("email") as string,
-    phone_number: phoneNumber,
-    address: formData.get("address") as string,
-    password: formData.get("password") as string,
+    username: formData.get("name") as string,
+    password_AES: encryptAES(formData.get("password") as string, iv) as string,
+    health_data_RC4: encryptRC4(
+      formData.get("health_data") as string
+    ) as string,
+    income_DES: encryptDES(income, iv) as string,
   };
 
   const file = formData.get("file_input") as File;
   const arrayBuffer = await file.arrayBuffer();
   const bufferFile = arrayBufferToBuffer(arrayBuffer);
-  const iv = randomBytes(16); // put iv on each files
 
   const user = await prisma.user.create({ data: userData });
 
