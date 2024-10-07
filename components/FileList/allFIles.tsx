@@ -5,15 +5,17 @@ import { getFiles } from "@/actions/fileActions";
 import { Context } from "../Provider/TokenProvider";
 import { deleteFiles } from "@/actions/fileActions";
 import toast from "react-hot-toast";
-import { decryptAES } from "../encryptions/aes";
-import { decryptRC4 } from "../encryptions/rc4";
+import { decryptAES } from "../encryptions/aes"; // Menghapus import AES
+import { decryptRC4 } from "../encryptions/rc4"; // Menggunakan RC4
 
 const AllFiles = () => {
   const [files, setFiles] = useState<any[]>([]);
   const context = useContext(Context);
+  
   if (!context) {
     throw new Error("Context must be used within a ContextProvider");
   }
+  
   const { getToken } = context;
   const token = getToken();
 
@@ -38,7 +40,7 @@ const AllFiles = () => {
         await deleteFiles(token, idFile);
         setFiles((prevFiles) => prevFiles.filter((file) => file.id !== idFile)); // Remove file from the list
         console.log("file deleted successfully");
-        toast.success("file deleted succesfully");
+        toast.success("file deleted successfully");
       }
     } catch (error) {
       console.error("Failed to delete file:", error);
@@ -50,9 +52,8 @@ const AllFiles = () => {
     const data = await response.json();
 
     if (data) {
-      const decrypt = 2;
-      const encryptedBuffer = Buffer.from(data.rc4_encrypted.data); // Access the data array
-      const decrypted = decryptRC4(encryptedBuffer); // Call the decrypt function with the Buffer
+      const encryptedBuffer = Buffer.from(data.rc4_encrypted.data); // Access the encrypted data array
+      const decrypted = decryptRC4(encryptedBuffer); // Decrypt using RC4
 
       const blob = new Blob([decrypted], { type: data.fileType });
       const url = URL.createObjectURL(blob);
@@ -60,15 +61,7 @@ const AllFiles = () => {
       const a = document.createElement("a");
       a.href = url;
 
-      let type = "AES-";
-
-      if (decrypt === 2) {
-        type = "RC4-";
-      } else if (decrypt === 3) {
-        type = "DES-";
-      }
-
-      a.download = "decrypted-" + type + data.fileName; // Specify the filename
+      a.download = "decrypted-RC4-" + data.fileName; // Specify the filename
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

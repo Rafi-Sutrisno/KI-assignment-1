@@ -8,12 +8,11 @@ datasource db {
 }
 
 model User {
-  id           String      @id @default(cuid())
-  name         String
-  email        String      @unique
-  phone_number String
-  address      String
-  password     String
+  id               String      @id @default(cuid())
+  username         String      @unique
+  password_AES     String
+  health_data_RC4  String
+  income_DES       String
 
   user_files   UserFiles[]
 }
@@ -23,10 +22,15 @@ model UserFiles {
   userId        String
   fileType      String
   fileName      String
+
   aes_encrypted Bytes
   aes_iv        Bytes
+
   rc4_encrypted Bytes
+  rc4_iv        Bytes
+
   des_encrypted Bytes
+  des_iv        Bytes
   
-  user          User   @relation(fields: [userId], references: [id])
+  user          User   @relation(fields: [userId], references: [id])
 }
