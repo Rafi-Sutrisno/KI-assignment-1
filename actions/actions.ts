@@ -45,11 +45,11 @@ export async function createUser(formData: FormData) {
 }
 
 export async function userLogin(params: UserLoginParams) {
-  const { email, password } = params;
+  const { username, password } = params;
 
   const user = await prisma.user.findUnique({
     where: {
-      email: email,
+      username: username,
     },
   });
 
@@ -57,7 +57,9 @@ export async function userLogin(params: UserLoginParams) {
     throw new Error("User not found");
   }
 
-  if (user.password !== password) {
+  let passwordDecrypt = user.password_AES;
+
+  if (passwordDecrypt !== password) {
     throw new Error("Invalid password");
   }
 
@@ -70,4 +72,11 @@ export async function userLogin(params: UserLoginParams) {
   );
 
   return { token };
+}
+
+export async function getCurrentUser(token: string) {
+  console.log("ini token: ", token);
+  const user = await prisma.user.findFirst();
+
+  return user;
 }

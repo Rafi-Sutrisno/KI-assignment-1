@@ -25,11 +25,11 @@ export const Login: React.FC<RegisterProps> = ({ change, setSelect }) => {
     const form = event.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
 
-    const email = formData.get("email") as string;
+    const username = formData.get("username") as string;
     const password = formData.get("password") as string;
 
     try {
-      const token = await userLogin({ email, password });
+      const token = await userLogin({ username, password });
       change("/");
       toast.success("success to login.");
       console.log(token);
@@ -59,17 +59,17 @@ export const Login: React.FC<RegisterProps> = ({ change, setSelect }) => {
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label
-              htmlFor="email"
+              htmlFor="username"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Email address
+              Username
             </label>
             <div className="mt-2">
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="username"
+                name="username"
+                type="username"
+                autoComplete="username"
                 required
                 className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
