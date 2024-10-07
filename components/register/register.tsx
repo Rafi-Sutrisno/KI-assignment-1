@@ -1,5 +1,4 @@
 "use client";
-import { createUser } from "@/actions/actions";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
 import toast from "react-hot-toast";
@@ -10,13 +9,29 @@ interface RegisterProps {
   handleSubmit: (event: React.FormEvent, selectedFile: File) => Promise<void>;
 }
 
-export const Register: React.FC<RegisterProps> = ({
-  change,
-  setSelect,
-  handleSubmit,
-}) => {
+export const Register: React.FC<RegisterProps> = ({ handleSubmit }) => {
   const [phone, setPhone] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [income1, setIncome1] = useState<number>(0);
+  const [income2, setIncome2] = useState<number>(0);
+
+  // Function to increment income by Rp 1.000.000
+  const incrementAmount = (
+    income: number,
+    setIncome: React.Dispatch<React.SetStateAction<number>>
+  ) => {
+    setIncome(income + 100);
+  };
+
+  // Function to decrement income by Rp 1.000.000
+  const decrementAmount = (
+    income: number,
+    setIncome: React.Dispatch<React.SetStateAction<number>>
+  ) => {
+    if (income > 0) {
+      setIncome(income - 100);
+    }
+  };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/^0/, ""); // Remove leading 0
@@ -61,78 +76,13 @@ export const Register: React.FC<RegisterProps> = ({
                 htmlFor="fullname"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Full Name
+                Username
               </label>
               <div className="mt-2">
                 <input
                   id="name"
                   name="name"
                   type="text"
-                  required
-                  className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone Number
-              </label>
-              <div className="mt-1 flex">
-                <span className="inline-flex items-center px-3 text-gray-500 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md">
-                  +62
-                </span>
-                <input
-                  type="number"
-                  name="phone"
-                  id="phone"
-                  value={phone}
-                  onChange={handlePhoneChange}
-                  className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  placeholder="81234567890" // No leading 0
-                  onInput={(e) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(
-                      /[^0-9]/g,
-                      ""
-                    );
-                  }}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="adddress"
-                className="block mb-2 text-sm font-medium text-black"
-              >
-                Address
-              </label>
-              <textarea
-                id="address"
-                name="address"
-                rows={4}
-                className="block p-2.5 w-full text-sm rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="Type your address"
-              ></textarea>
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Email address
-              </label>
-              <div className="mt-2">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
                   required
                   className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
@@ -163,6 +113,156 @@ export const Register: React.FC<RegisterProps> = ({
                   required
                   className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="health_data"
+                className="block mb-2 text-sm font-medium text-black"
+              >
+                Previous Health Conditions (If any)
+              </label>
+              <textarea
+                id="health_data"
+                name="health_data"
+                rows={4}
+                className="block p-2.5 w-full text-sm rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                placeholder="Type your address"
+              ></textarea>
+            </div>
+
+            <div className="flex gap-5">
+              <div className="">
+                <label
+                  htmlFor="quantity-input-income1"
+                  className="block mb-2 text-sm font-medium text-black"
+                >
+                  Income Range
+                </label>
+                <div className="relative flex items-center max-w-[10rem]">
+                  <button
+                    type="button"
+                    id="decrement-button-income1"
+                    onClick={() => decrementAmount(income1, setIncome1)}
+                    className="bg-white hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                  >
+                    <svg
+                      className="w-3 h-3 text-black"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 2"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M1 1h16"
+                      />
+                    </svg>
+                  </button>
+                  <input
+                    type="text"
+                    id="income-1"
+                    name="income-1"
+                    aria-describedby="helper-text-explanation"
+                    className="bg-white hover:bg-gray-200 border border-gray-300  h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5  dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    value={`$ ${income1.toLocaleString()}`}
+                    readOnly
+                  />
+                  <button
+                    type="button"
+                    id="increment-button-income1"
+                    onClick={() => incrementAmount(income1, setIncome1)}
+                    className="bg-white hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                  >
+                    <svg
+                      className="w-3 h-3 text-black"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 18"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 1v16M1 9h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-center align-middle items-center">
+                <p className="text-black translate-y-3">-</p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="quantity-input-income2"
+                  className="block mb-2 text-sm font-medium text-white"
+                >
+                  To
+                </label>
+                <div className="relative flex items-center max-w-[10rem]">
+                  <button
+                    type="button"
+                    id="decrement-button-income2"
+                    onClick={() => decrementAmount(income2, setIncome2)}
+                    className="bg-white hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                  >
+                    <svg
+                      className="w-3 h-3 text-black"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 2"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M1 1h16"
+                      />
+                    </svg>
+                  </button>
+                  <input
+                    type="text"
+                    id="income-2"
+                    name="income-2"
+                    aria-describedby="helper-text-explanation"
+                    className="bg-white hover:bg-gray-200 border border-gray-300  h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5  dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    value={`$ ${income2.toLocaleString()}`}
+                    readOnly
+                  />
+                  <button
+                    type="button"
+                    id="increment-button-income2"
+                    onClick={() => incrementAmount(income2, setIncome2)}
+                    className="bg-white hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                  >
+                    <svg
+                      className="w-3 h-3 text-black"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 18"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 1v16M1 9h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
 
