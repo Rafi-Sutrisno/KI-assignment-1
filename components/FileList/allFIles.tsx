@@ -7,10 +7,14 @@ import { deleteFiles } from "@/actions/fileActions";
 import toast from "react-hot-toast";
 import { decryptAES } from "../encryptions/aes";
 import { decryptRC4 } from "../encryptions/rc4";
+import Loading from "../loading/loading";
 
 const AllFiles = () => {
   const [files, setFiles] = useState<any[]>([]);
   const context = useContext(Context);
+
+  const [loading, setLoading] = useState(true);
+
   if (!context) {
     throw new Error("Context must be used within a ContextProvider");
   }
@@ -23,6 +27,7 @@ const AllFiles = () => {
         try {
           const fetchedFiles = await getFiles(token);
           setFiles(fetchedFiles);
+          setLoading(false);
         } catch (error) {
           console.error("Failed to fetch files", error);
         }
@@ -82,37 +87,45 @@ const AllFiles = () => {
     <div className="flex flex-wrap gap-4">
       {token ? (
         <>
-          {files.length > 0 ? (
-            files.map((file) => (
-              <Card
-                key={file.id}
-                fileType={file.fileType}
-                fileID={file.id}
-                fileName={file.fileName}
-                handleDelete={handleDelete}
-                handleDownload={handleDownload}
-              />
-            ))
+          {loading ? (
+            <>
+              <Loading />
+            </>
           ) : (
-            <div
-              className="flex items-center p-4 mb-4 text-sm text-gray-800 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
-              role="alert"
-            >
-              <svg
-                className="flex-shrink-0 inline w-4 h-4 me-3"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
-              </svg>
-              <span className="sr-only">Info</span>
-              <div>
-                <span className="font-medium">No Files Available!</span> You
-                haven't uploaded any files yet.
-              </div>
-            </div>
+            <>
+              {files.length > 0 ? (
+                files.map((file) => (
+                  <Card
+                    key={file.id}
+                    fileType={file.fileType}
+                    fileID={file.id}
+                    fileName={file.fileName}
+                    handleDelete={handleDelete}
+                    handleDownload={handleDownload}
+                  />
+                ))
+              ) : (
+                <div
+                  className="flex items-center p-4 mb-4 text-sm text-gray-800 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
+                  role="alert"
+                >
+                  <svg
+                    className="flex-shrink-0 inline w-4 h-4 me-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                  </svg>
+                  <span className="sr-only">Info</span>
+                  <div>
+                    <span className="font-medium">No Files Available!</span> You
+                    haven't uploaded any files yet.
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </>
       ) : (
