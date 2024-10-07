@@ -1,8 +1,9 @@
 "use server";
 
 import prisma from "@/lib/db";
-import { arrayBufferToBuffer, encrypt } from "@/components/encryptions/aes";
+import { arrayBufferToBuffer, encryptAES } from "@/components/encryptions/aes";
 import { randomBytes } from "crypto";
+import { encryptRC4 } from "@/components/encryptions/rc4";
 
 export async function uploadFile(formData: FormData, token: string) {
   const secretKey = "testingkey"; // Use the non-public key
@@ -28,9 +29,9 @@ export async function uploadFile(formData: FormData, token: string) {
         userId: userId,
         fileType: file.type,
         fileName: file.name,
-        aes_encrypted: encrypt(bufferFile, iv),
+        aes_encrypted: encryptAES(bufferFile, iv) as Buffer,
         aes_iv: iv,
-        rc4_encrypted: Buffer.from("dummy_aes_encrypted_data"),
+        rc4_encrypted: encryptRC4(bufferFile) as Buffer,
         des_encrypted: Buffer.from("dummy_aes_encrypted_data"),
       },
     });

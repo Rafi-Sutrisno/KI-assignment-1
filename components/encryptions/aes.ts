@@ -10,22 +10,44 @@ export function arrayBufferToBuffer(arrayBuffer: ArrayBuffer): Buffer {
   return Buffer.from(new Uint8Array(arrayBuffer));
 }
 
-export function encrypt(file: Buffer, iv: Buffer): Buffer {
-  const cipher = createCipheriv(algorithm, key, iv);
-  let encrypted = cipher.update(file);
-  encrypted = Buffer.concat([encrypted, cipher.final()]);
-
-  return encrypted;
+export function encryptAES(
+  input: Buffer | string,
+  iv: Buffer
+): Buffer | string {
+  let cipher, encrypted;
+  if (typeof input === "string") {
+    cipher = createCipheriv(algorithm, key, iv);
+    encrypted = cipher.update(input, "utf8", "hex");
+    encrypted += cipher.final("hex");
+    return encrypted;
+  } else {
+    cipher = createCipheriv(algorithm, key, iv);
+    encrypted = cipher.update(input);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return encrypted;
+  }
 }
 
-export function decrypt(encryptedFile: Buffer, iv: Buffer): Buffer {
-  const decipher = createDecipheriv(algorithm, key, iv);
+export function decryptAES(
+  encryptedInput: Buffer,
+  iv: Buffer
+): Buffer | string {
+  let decipher, decrypted;
 
-  // Decrypt the encrypted data
-  let decrypted = decipher.update(encryptedFile);
+  if (typeof encryptedInput === "string") {
+    decipher = createDecipheriv(algorithm, key, iv);
+    decrypted = decipher.update(encryptedInput, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+  } else {
+    decipher = createDecipheriv(algorithm, key, iv);
 
-  // Finalize decryption
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
+    // Decrypt the encrypted data
+    decrypted = decipher.update(encryptedInput);
 
-  return decrypted;
+    // Finalize decryption
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+
+    return decrypted;
+  }
 }

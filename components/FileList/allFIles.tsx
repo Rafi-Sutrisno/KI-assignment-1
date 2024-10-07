@@ -5,7 +5,8 @@ import { getFiles } from "@/actions/fileActions";
 import { Context } from "../Provider/TokenProvider";
 import { deleteFiles } from "@/actions/fileActions";
 import toast from "react-hot-toast";
-import { decrypt } from "../encryptions/aes";
+import { decryptAES } from "../encryptions/aes";
+import { decryptRC4 } from "../encryptions/rc4";
 
 const AllFiles = () => {
   const [files, setFiles] = useState<any[]>([]);
@@ -47,18 +48,27 @@ const AllFiles = () => {
   const handleDownload = async (idFile: string) => {
     const response = await fetch(`/api/getFile?id=${idFile}`);
     const data = await response.json();
-    console.log("ini data: ", data.aes_encrypted.data);
-    console.log("ini aes iv: ", data.aes_iv);
+
     if (data) {
-      const encryptedBuffer = Buffer.from(data.aes_encrypted.data); // Access the data array
-      const decrypted = decrypt(encryptedBuffer, data.aes_iv.data); // Call the decrypt function with the Buffer
+      const decrypt = 2;
+      const encryptedBuffer = Buffer.from(data.rc4_encrypted.data); // Access the data array
+      const decrypted = decryptRC4(encryptedBuffer); // Call the decrypt function with the Buffer
 
       const blob = new Blob([decrypted], { type: data.fileType });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "decrypted-" + data.fileName; // Specify the filename
+
+      let type = "AES-";
+
+      if (decrypt === 2) {
+        type = "RC4-";
+      } else if (decrypt === 3) {
+        type = "DES-";
+      }
+
+      a.download = "decrypted-" + type + data.fileName; // Specify the filename
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

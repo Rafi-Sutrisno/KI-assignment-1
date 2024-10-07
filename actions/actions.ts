@@ -3,14 +3,20 @@
 import prisma from "@/lib/db";
 import { UserLoginParams } from "@/interface/user";
 import jwt from "jsonwebtoken";
-import { arrayBufferToBuffer, encrypt } from "@/components/encryptions/aes";
+import { arrayBufferToBuffer, encryptAES } from "@/components/encryptions/aes";
 import { randomBytes } from "crypto";
+import { encryptRC4 } from "@/components/encryptions/rc4";
 
 export async function createUser(formData: FormData) {
+  let phoneNumber = formData.get("phone") as string;
+  if (!phoneNumber.startsWith("+62")) {
+    phoneNumber = "+62" + phoneNumber;
+  }
+
   const userData = {
     name: formData.get("name") as string,
     email: formData.get("email") as string,
-    phone_number: formData.get("phone") as string,
+    phone_number: phoneNumber,
     address: formData.get("address") as string,
     password: formData.get("password") as string,
   };
@@ -27,9 +33,10 @@ export async function createUser(formData: FormData) {
       userId: user.id,
       fileType: file.type,
       fileName: file.name,
-      aes_encrypted: encrypt(bufferFile, iv),
+      aes_encrypted: encryptAES(bufferFile, iv) as Buffer,
       aes_iv: iv,
-      rc4_encrypted: Buffer.from("dummy_aes_encrypted_data"),
+      rc4_encrypted: encryptRC4(bufferFile) as Buffer,
+      // rc4_encrypted: Buffer.from("dummy_rc4"),
       des_encrypted: Buffer.from("dummy_aes_encrypted_data"),
     },
   });
