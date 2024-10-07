@@ -88,6 +88,7 @@ const AllFiles = () => {
                 key={file.id}
                 fileType={file.fileType}
                 fileID={file.id}
+                fileName={file.fileName}
                 handleDelete={handleDelete}
                 handleDownload={handleDownload}
               />
