@@ -8,11 +8,13 @@ datasource db {
 }
 
 model User {
-  id        id               String      @id @default(cuid())
+  id               String      @id @default(cuid())
   username         String      @unique
   password_AES     String
+  aes_iv           Bytes
   health_data_RC4  String
   income_DES       String
+  des_iv           Bytes
 
   user_files   UserFiles[]
 }
@@ -26,7 +28,7 @@ model UserFiles {
   aes_encrypted Bytes
   aes_iv        Bytes
 
-  rc4_encrypted     Bytes
+  rc4_encrypted Bytes
 
   des_encrypted Bytes
   des_iv        Bytes

@@ -16,10 +16,12 @@ export async function createUser(formData: FormData) {
   const userData = {
     username: formData.get("name") as string,
     password_AES: encryptAES(formData.get("password") as string, iv) as string,
+    aes_iv: iv,
     health_data_RC4: encryptRC4(
       formData.get("health_data") as string
     ) as string,
     income_DES: encryptDES(income, iv) as string,
+    des_iv: iv,
   };
 
   const file = formData.get("file_input") as File;
@@ -37,7 +39,8 @@ export async function createUser(formData: FormData) {
       aes_iv: iv,
       rc4_encrypted: encryptRC4(bufferFile) as Buffer,
       // rc4_encrypted: Buffer.from("dummy_rc4"),
-      des_encrypted: Buffer.from("dummy_aes_encrypted_data"),
+      des_encrypted: encryptDES(bufferFile, iv) as Buffer,
+      des_iv: iv,
     },
   });
 
