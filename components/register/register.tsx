@@ -1,5 +1,4 @@
 "use client";
-import { createUser } from "@/actions/actions";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
 import toast from "react-hot-toast";
@@ -10,11 +9,7 @@ interface RegisterProps {
   handleSubmit: (event: React.FormEvent, selectedFile: File) => Promise<void>;
 }
 
-export const Register: React.FC<RegisterProps> = ({
-  change,
-  setSelect,
-  handleSubmit,
-}) => {
+export const Register: React.FC<RegisterProps> = ({ handleSubmit }) => {
   const [phone, setPhone] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
