@@ -58,7 +58,7 @@ const AllFiles = () => {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "decrypted-" + data.fileName; // Specify the filename
+      a.download = "decrypted_" + data.fileName; // Specify the filename
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -78,6 +78,7 @@ const AllFiles = () => {
                 key={file.id}
                 fileType={file.fileType}
                 fileID={file.id}
+                fileName={file.fileName}
                 handleDelete={handleDelete}
                 handleDownload={handleDownload}
               />

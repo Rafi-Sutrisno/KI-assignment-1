@@ -3,6 +3,7 @@ import Image from "next/image";
 interface CardProps {
   fileType: string;
   fileID: string;
+  fileName: String;
   handleDelete: (idFile: string) => void;
   handleDownload: (idFile: string) => void;
 }
@@ -10,6 +11,7 @@ interface CardProps {
 const Card: React.FC<CardProps> = ({
   fileType,
   fileID,
+  fileName,
   handleDelete,
   handleDownload,
 }) => {
@@ -24,7 +26,7 @@ const Card: React.FC<CardProps> = ({
       </a>
       <div className="p-5 flex flex-col justify-between">
         <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-          {fileID}
+          {fileName}
         </p>
         <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
           {fileType}
