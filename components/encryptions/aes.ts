@@ -29,7 +29,7 @@ export function encryptAES(
 }
 
 export function decryptAES(
-  encryptedInput: Buffer,
+  encryptedInput: Buffer | string,
   iv: Buffer
 ): Buffer | string {
   let decipher, decrypted;
