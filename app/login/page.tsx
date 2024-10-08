@@ -2,13 +2,30 @@
 import { Login } from "@/components/login/login";
 import { Register } from "@/components/register/register";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createUser } from "@/actions/actions";
 import toast from "react-hot-toast";
+import { Context } from "@/components/Provider/TokenProvider";
+import { useContext } from "react";
 
 export default function LoginPage() {
+  const context = useContext(Context);
+
+  if (!context) {
+    throw new Error("Context must be used within a ContextProvider");
+  }
+
+  const { getToken } = context;
+
   const [selected, setSelected] = useState<string>("login");
   const router = useRouter();
+
+  useEffect(() => {
+    if (getToken()) {
+      router.push("/");
+    }
+  }, [getToken, router]);
+
   const showPage = (category: string) => {
     setSelected(category);
   };
