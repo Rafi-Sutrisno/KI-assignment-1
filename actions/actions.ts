@@ -22,12 +22,12 @@ export async function createUser(formData: FormData) {
     password_AES: encryptAES(formData.get("password") as string, iv) as string,
     aes_iv: iv,
 
-    // health_data_RC4: encryptRC4(
-    //   formData.get("health_data") as string
-    // ) as string,
+    health_data_RC4: encryptRC4(
+      formData.get("health_data") as string
+    ) as string,
     // income_DES: encryptDES(income, iv) as string,
 
-    health_data_RC4: formData.get("health_data") as string,
+    // health_data_RC4: formData.get("health_data") as string,
     income_DES: income as string,
     des_iv: iv,
   };
