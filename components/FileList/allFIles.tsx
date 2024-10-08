@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 import { decryptAES } from "../encryptions/aes";
 import { decryptRC4 } from "../encryptions/rc4.js";
 import Loading from "../loading/loading";
+import { decryptDES } from "../encryptions/des";
+import { randomBytes } from "crypto";
 
 const AllFiles = () => {
   const [files, setFiles] = useState<any[]>([]);
@@ -51,21 +53,42 @@ const AllFiles = () => {
     }
   };
 
-  const handleDownload = async (idFile: string) => {
+  const handleDownload = async (idFile: string, encType: string) => {
     const response = await fetch(`/api/getFile?id=${idFile}`);
     const data = await response.json();
 
+    let type, url, encryptedBuffer, decrypted, blob;
+    const a = document.createElement("a");
+
     if (data) {
-      const encryptedBuffer = Buffer.from(data.rc4_encrypted.data); // Access the encrypted data array
-      const decrypted = decryptRC4(encryptedBuffer); // Decrypt using RC4
+      if (encType == "rc4") {
+        encryptedBuffer = Buffer.from(data.rc4_encrypted.data);
+        decrypted = decryptRC4(encryptedBuffer);
 
-      const blob = new Blob([decrypted], { type: data.fileType });
-      const url = URL.createObjectURL(blob);
+        blob = new Blob([decrypted], { type: data.fileType });
+        url = URL.createObjectURL(blob);
+        type = "RC4-";
+      } else if (encType == "des") {
+        encryptedBuffer = Buffer.from(data.rc4_encrypted.data);
+        decrypted = decryptDES(encryptedBuffer, randomBytes(8));
 
-      const a = document.createElement("a");
+        blob = new Blob([decrypted], { type: data.fileType });
+        url = URL.createObjectURL(blob);
+        type = "DES-";
+      } else if (encType == "aes") {
+        encryptedBuffer = Buffer.from(data.aes_encrypted.data);
+        decrypted = decryptAES(encryptedBuffer, data.aes_iv);
+
+        blob = new Blob([decrypted], { type: data.fileType });
+        url = URL.createObjectURL(blob);
+        type = "AES-";
+      } else {
+        return;
+      }
+
       a.href = url;
 
-      a.download = "decrypted-RC4-" + data.fileName; // Specify the filename
+      a.download = "decrypted-" + type + data.fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

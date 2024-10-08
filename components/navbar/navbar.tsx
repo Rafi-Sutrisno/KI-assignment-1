@@ -16,9 +16,10 @@ const Navbar = () => {
   const { getToken, resetToken } = context;
 
   const logOut = () => {
-    resetToken;
+    console.log("logout");
+    resetToken();
     toast.success("success to logout.");
-    window.location.reload();
+    // window.location.reload();
   };
 
   return (
