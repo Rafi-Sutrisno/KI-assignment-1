@@ -5,7 +5,7 @@ import { Context } from "../Provider/TokenProvider";
 import { getCurrentUser } from "@/actions/actions";
 import { User } from "@/interface/user";
 import Loading from "../loading/loading";
-import { decryptRC4 } from "../encryptions/rc4.js";
+import { decryptRC4 } from "../encryptions/rc4";
 import { FaEyeSlash } from "react-icons/fa";
 
 const Profile = () => {
@@ -17,14 +17,27 @@ const Profile = () => {
   );
 
   // Function to decrypt the RC4 data and update the state
-  const handleDecryptRC4 = () => {
-    if (user?.health_data_RC4) {
-      console.log("ini masuk");
-      const decryptedData = decryptRC4(user.health_data_RC4) as string; // Replace with your actual decryption function
-      console.log("berhasil decrypt");
-      setDecryptedHealthData(decryptedData);
+  async function handleDecryptRC4(encryptedInput: string | undefined) {
+    try {
+      const response = await fetch("/api/decrypt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ encryptedInput }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Decrypted data:", data);
+      setDecryptedHealthData(data.decrypted);
+    } catch (error) {
+      console.error("Error:", error);
     }
-  };
+  }
 
   if (!context) {
     throw new Error("Context must be used within a ContextProvider");
@@ -88,7 +101,10 @@ const Profile = () => {
                     : user?.health_data_RC4}
                 </p>
 
-                <button onClick={handleDecryptRC4} className="">
+                <button
+                  onClick={() => handleDecryptRC4(user?.health_data_RC4)}
+                  className=""
+                >
                   <FaEyeSlash color="black" />
                 </button>
               </div>

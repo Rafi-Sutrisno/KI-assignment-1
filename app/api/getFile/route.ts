@@ -1,5 +1,5 @@
 // pages/api/getFile.ts
-import prisma from "@/lib/db"; // Make sure you import your Prisma client correctly
+import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {

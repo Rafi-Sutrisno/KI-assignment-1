@@ -6,7 +6,6 @@ import { Context } from "../Provider/TokenProvider";
 import { deleteFiles } from "@/actions/fileActions";
 import toast from "react-hot-toast";
 import { decryptAES } from "../encryptions/aes";
-import { decryptRC4 } from "../encryptions/rc4.js";
 import Loading from "../loading/loading";
 import { decryptDES } from "../encryptions/des";
 import { randomBytes } from "crypto";
@@ -57,14 +56,33 @@ const AllFiles = () => {
     const response = await fetch(`/api/getFile?id=${idFile}`);
     const data = await response.json();
 
-    let type, url, encryptedBuffer, decrypted, blob;
+    let type, url, encryptedBuffer, decrypted, blob, res;
     const a = document.createElement("a");
 
     if (data) {
       if (encType == "rc4") {
         encryptedBuffer = Buffer.from(data.rc4_encrypted.data);
-        decrypted = decryptRC4(encryptedBuffer);
+        console.log("in eB rc4: ", encryptedBuffer);
+        // decrypted = decryptRC4(encryptedBuffer);
+        try {
+          const response = await fetch("/api/decrypt/file", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ encryptedBuffer }),
+          });
 
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          res = await response.json();
+        } catch (error) {
+          console.error("Error:", error);
+        }
+        decrypted = Buffer.from(res.decrypted.data);
+        console.log("ini rc4 decrypt: ", decrypted);
         blob = new Blob([decrypted], { type: data.fileType });
         url = URL.createObjectURL(blob);
         type = "RC4-";
@@ -77,8 +95,9 @@ const AllFiles = () => {
         type = "DES-";
       } else if (encType == "aes") {
         encryptedBuffer = Buffer.from(data.aes_encrypted.data);
-        decrypted = decryptAES(encryptedBuffer, data.aes_iv);
-
+        console.log("in eB aes: ", encryptedBuffer);
+        decrypted = decryptAES(encryptedBuffer, data.aes_iv.data);
+        console.log("ini aes decrypt: ", decrypted);
         blob = new Blob([decrypted], { type: data.fileType });
         url = URL.createObjectURL(blob);
         type = "AES-";

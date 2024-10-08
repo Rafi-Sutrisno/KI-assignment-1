@@ -24,6 +24,7 @@ export function decryptRC4(encryptedInput: Buffer | string): Buffer | string {
   let decipher, decrypted;
   const encryptionKeyHex = "3f27cb95e2d8d29600ca4e860a1f3ca3";
   const key = Buffer.from(encryptionKeyHex, "hex");
+  console.log("ini key: ", key);
   if (typeof encryptedInput === "string") {
     decipher = createDecipheriv("rc4", key, ""); // No IV for RC4
     decrypted = decipher.update(encryptedInput, "hex", "utf8");
