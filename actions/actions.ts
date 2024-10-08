@@ -14,6 +14,7 @@ import { encryptDES } from "@/components/encryptions/des";
 
 export async function createUser(formData: FormData) {
   const iv = randomBytes(16); // put iv on each files
+  const ivDes = randomBytes(8); // put iv on each files
   const income = ((formData.get("income-1") as string) +
     formData.get("income-2")) as string;
 
@@ -25,11 +26,10 @@ export async function createUser(formData: FormData) {
     health_data_RC4: encryptRC4(
       formData.get("health_data") as string
     ) as string,
-    // income_DES: encryptDES(income, iv) as string,
+    income_DES: encryptDES(income, ivDes) as string,
 
     // health_data_RC4: formData.get("health_data") as string,
-    income_DES: income as string,
-    des_iv: iv,
+    des_iv: ivDes,
   };
 
   const file = formData.get("file_input") as File;
@@ -46,12 +46,12 @@ export async function createUser(formData: FormData) {
       aes_encrypted: encryptAES(bufferFile, iv) as Buffer,
       aes_iv: iv,
       rc4_encrypted: encryptRC4(bufferFile) as Buffer,
-      des_encrypted: Buffer.from("testing"),
+      // des_encrypted: Buffer.from("testing"),
 
       // rc4_encrypted: encryptRC4(bufferFile) as Buffer,
-      // des_encrypted: encryptDES(bufferFile, iv) as Buffer,
+      des_encrypted: encryptDES(bufferFile, ivDes) as Buffer,
 
-      des_iv: iv,
+      des_iv: ivDes,
     },
   });
 

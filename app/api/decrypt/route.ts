@@ -4,8 +4,8 @@ import { createDecipheriv } from "crypto";
 export async function POST(req: Request) {
   try {
     const { encryptedInput } = await req.json(); // Extract encryptedInput from request body
-    const encryptionKeyHex = "3f27cb95e2d8d29600ca4e860a1f3ca3";
-    const key = Buffer.from(encryptionKeyHex, "hex");
+    const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_DES_KEY;;
+    const key = Buffer.from(encryptionKeyHex!, "hex");
 
     if (!encryptedInput) {
       return NextResponse.json(
@@ -25,3 +25,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Decryption failed." }, { status: 500 });
   }
 }
+
+
+

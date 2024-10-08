@@ -7,8 +7,7 @@ import { deleteFiles } from "@/actions/fileActions";
 import toast from "react-hot-toast";
 import { decryptAES } from "../encryptions/aes";
 import Loading from "../loading/loading";
-import { decryptDES } from "../encryptions/des";
-import { randomBytes } from "crypto";
+// import { randomBytes } from "crypto";
 
 const AllFiles = () => {
   const [files, setFiles] = useState<any[]>([]);
@@ -86,16 +85,41 @@ const AllFiles = () => {
         blob = new Blob([decrypted], { type: data.fileType });
         url = URL.createObjectURL(blob);
         type = "RC4-";
-      } else if (encType == "des") {
-        encryptedBuffer = Buffer.from(data.rc4_encrypted.data);
-        decrypted = decryptDES(encryptedBuffer, randomBytes(8));
+      }
+      
+      
+      else if (encType == "des") {
+        encryptedBuffer = Buffer.from(data.des_encrypted.data);
+        const ivDes = data.des_iv.data;
+        console.log("ini ivdes all: " + ivDes);
+        try {
+          const response = await fetch("/api/decryptDES/file", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ encryptedBuffer, ivDes }),
+          });
 
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          res = await response.json();
+        } catch (error) {
+          console.error("Error:", error);
+        }
+
+        decrypted = Buffer.from(res.decrypted.data);
+        console.log("ini des decrypt: ", decrypted);
         blob = new Blob([decrypted], { type: data.fileType });
         url = URL.createObjectURL(blob);
         type = "DES-";
-      } else if (encType == "aes") {
+      }
+      
+      else if (encType == "aes") {
         encryptedBuffer = Buffer.from(data.aes_encrypted.data);
-        console.log("in eB aes: ", encryptedBuffer);
+        console.log("in iv aes: ", data.aes_iv.data);
         decrypted = decryptAES(encryptedBuffer, data.aes_iv.data);
         console.log("ini aes decrypt: ", decrypted);
         blob = new Blob([decrypted], { type: data.fileType });
@@ -106,7 +130,6 @@ const AllFiles = () => {
       }
 
       a.href = url;
-
       a.download = "decrypted-" + type + data.fileName;
       document.body.appendChild(a);
       a.click();

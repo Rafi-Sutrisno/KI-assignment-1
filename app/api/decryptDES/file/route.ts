@@ -1,19 +1,21 @@
 import { NextResponse } from "next/server";
-import { createDecipheriv } from "crypto";
+import { createDecipheriv} from "crypto";
 
 export async function POST(req: Request) {
   try {
-    const { encryptedBuffer } = await req.json(); // Extract encryptedInput from request body
-    const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_DES_KEY;;
+    const { encryptedBuffer, ivDes } = await req.json(); // Extract encryptedInput from request body
+    const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_DES_KEY;
     const key = Buffer.from(encryptionKeyHex!, "hex");
-    console.log("ini eB post: ", encryptedBuffer);
+    console.log("ini des post: ", encryptedBuffer);
     if (!encryptedBuffer) {
       return NextResponse.json(
         { error: "No encrypted input provided." },
         { status: 400 }
       );
     }
-    const decipher = createDecipheriv("rc4", key, null); // No IV for RC4
+
+    const ivBuf = Buffer.from(ivDes);
+    const decipher = createDecipheriv("des", key, ivBuf); // No IV for RC4
     let decrypted = decipher.update(
       Buffer.from(new Uint8Array(encryptedBuffer.data))
     );
