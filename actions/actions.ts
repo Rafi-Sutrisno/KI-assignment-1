@@ -91,7 +91,16 @@ export async function userLogin(params: UserLoginParams) {
 
 export async function getCurrentUser(token: string) {
   console.log("ini token: ", token);
-  const user = await prisma.user.findFirst();
+  const decodedToken = atob(token.split(".")[1]);
+  const jsonObject = JSON.parse(decodedToken);
+  const userId = jsonObject.id;
+  console.log(userId);
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
 
   return user;
 }
