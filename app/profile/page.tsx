@@ -1,6 +1,7 @@
+"use client";
 import Profile from "@/components/profile/profile";
 import { Context } from "@/components/Provider/TokenProvider";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 
 const profilePage = () => {
@@ -14,7 +15,7 @@ const profilePage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (getToken()) {
+    if (!getToken()) {
       router.push("/");
     }
   }, [getToken, router]);
