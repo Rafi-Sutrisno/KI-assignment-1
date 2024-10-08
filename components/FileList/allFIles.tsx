@@ -6,7 +6,7 @@ import { Context } from "../Provider/TokenProvider";
 import { deleteFiles } from "@/actions/fileActions";
 import toast from "react-hot-toast";
 import { decryptAES } from "../encryptions/aes";
-import { decryptRC4 } from "../encryptions/rc4";
+import { decryptRC4 } from "../encryptions/rc4.js";
 import Loading from "../loading/loading";
 import { decryptDES } from "../encryptions/des";
 import { randomBytes } from "crypto";

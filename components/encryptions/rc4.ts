@@ -1,8 +1,8 @@
 import { createCipheriv, createDecipheriv } from "crypto";
 
-const algorithm = "aes-256-cbc";
-const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_KEY;
-const key = Buffer.from(encryptionKeyHex!, "hex");
+const algorithm = "rc4";
+const encryptionKeyHex = "3f27cb95e2d8d29600ca4e860a1f3ca3";
+const key = Buffer.from(encryptionKeyHex, "hex");
 
 export function encryptRC4(input: Buffer | string): Buffer | string {
   let cipher, encrypted;
@@ -22,8 +22,10 @@ export function encryptRC4(input: Buffer | string): Buffer | string {
 // Decrypt using RC4, similar to AES
 export function decryptRC4(encryptedInput: Buffer | string): Buffer | string {
   let decipher, decrypted;
+  const encryptionKeyHex = "3f27cb95e2d8d29600ca4e860a1f3ca3";
+  const key = Buffer.from(encryptionKeyHex, "hex");
   if (typeof encryptedInput === "string") {
-    decipher = createDecipheriv(algorithm, key, null); // No IV for RC4
+    decipher = createDecipheriv("rc4", key, ""); // No IV for RC4
     decrypted = decipher.update(encryptedInput, "hex", "utf8");
     decrypted += decipher.final("utf8");
     return decrypted;
