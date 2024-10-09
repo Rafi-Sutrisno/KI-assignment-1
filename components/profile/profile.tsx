@@ -2,41 +2,96 @@
 import React from "react";
 import { useContext, useEffect, useState } from "react";
 import { Context } from "../Provider/TokenProvider";
-import { getCurrentUser } from "@/actions/actions";
+import { getCurrentUser, handleDecryptAES } from "@/actions/actions";
 import { User } from "@/interface/user";
 import Loading from "../loading/loading";
-import { decryptRC4 } from "../encryptions/rc4";
-import { FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Profile = () => {
   const [user, setUsers] = useState<User | null>(null);
   const context = useContext(Context);
   const [loading, setLoading] = useState(true);
+  const [isDecrypted, setIsDecrypted] = useState(false);
+  const [isDecryptedPw, setIsDecryptedPw] = useState(false);
+  const [isDecryptedIncome, setIsDecryptedIncome] = useState(false);
   const [decryptedHealthData, setDecryptedHealthData] = useState<string | null>(
     null
   );
+  const [decryptedPw, setDecryptedPw] = useState<string | null>(null);
+  const [decryptedIncome, setDecryptedIncome] = useState<string | null>(null);
 
   // Function to decrypt the RC4 data and update the state
   async function handleDecryptRC4(encryptedInput: string | undefined) {
-    try {
-      const response = await fetch("/api/decrypt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ encryptedInput }),
-      });
+    if (!isDecrypted) {
+      try {
+        const response = await fetch("/api/decrypt", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ encryptedInput }),
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Decrypted data:", data);
+        setDecryptedHealthData(data.decrypted);
+      } catch (error) {
+        console.error("Error:", error);
       }
-
-      const data = await response.json();
-      console.log("Decrypted data:", data);
-      setDecryptedHealthData(data.decrypted);
-    } catch (error) {
-      console.error("Error:", error);
+    } else {
+      setDecryptedHealthData(user!.health_data_RC4);
     }
+
+    setIsDecrypted(!isDecrypted);
+  }
+
+  async function handleButtonAES(
+    encryptedInput: string | undefined,
+    aes_iv: Buffer
+  ) {
+    if (!isDecryptedPw) {
+      const decrypted = await handleDecryptAES(encryptedInput, aes_iv);
+      setDecryptedPw(decrypted);
+    } else {
+      setDecryptedPw(user!.password_AES);
+    }
+
+    setIsDecryptedPw(!isDecryptedPw);
+  }
+
+  async function handleDecryptDES(
+    encryptedInput: string | undefined,
+    ivDes: Buffer
+  ) {
+    if (!isDecryptedIncome) {
+      try {
+        const response = await fetch("/api/decryptDES", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ encryptedInput, ivDes }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Decrypted data:", data);
+        setDecryptedIncome(data.decrypted);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    } else {
+      setDecryptedIncome(user!.income_DES);
+    }
+
+    setIsDecryptedIncome(!isDecryptedIncome);
   }
 
   if (!context) {
@@ -88,7 +143,23 @@ const Profile = () => {
               <label className="block text-sm font-medium text-gray-700">
                 Password (AES Encrypted):
               </label>
-              <p className="text-gray-900">{user?.password_AES}</p>
+              <div className="flex gap-3">
+                <p className="text-gray-900">
+                  {decryptedPw ? decryptedPw : user?.password_AES}
+                </p>
+                <button
+                  onClick={() =>
+                    handleButtonAES(user?.password_AES, user!.aes_iv)
+                  }
+                  className=""
+                >
+                  {isDecryptedPw ? (
+                    <FaEye color="black" />
+                  ) : (
+                    <FaEyeSlash color="black" />
+                  )}
+                </button>
+              </div>
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">
@@ -105,7 +176,11 @@ const Profile = () => {
                   onClick={() => handleDecryptRC4(user?.health_data_RC4)}
                   className=""
                 >
-                  <FaEyeSlash color="black" />
+                  {isDecrypted ? (
+                    <FaEye color="black" />
+                  ) : (
+                    <FaEyeSlash color="black" />
+                  )}
                 </button>
               </div>
             </div>
@@ -113,7 +188,24 @@ const Profile = () => {
               <label className="block text-sm font-medium text-gray-700">
                 Income (DES Encrypted):
               </label>
-              <p className="text-gray-900">{user?.income_DES}</p>
+              <div className="flex gap-3">
+                <p className="text-gray-900">
+                  {decryptedIncome ? decryptedIncome : user?.income_DES}
+                </p>
+
+                <button
+                  onClick={() =>
+                    handleDecryptDES(user?.income_DES, user!.des_iv)
+                  }
+                  className=""
+                >
+                  {isDecryptedIncome ? (
+                    <FaEye color="black" />
+                  ) : (
+                    <FaEyeSlash color="black" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </>

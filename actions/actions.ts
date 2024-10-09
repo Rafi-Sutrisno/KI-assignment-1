@@ -16,6 +16,7 @@ export async function createUser(formData: FormData) {
   const iv = randomBytes(16); // put iv on each files
   const ivDes = randomBytes(8); // put iv on each files
   const income = ((formData.get("income-1") as string) +
+    " - " +
     formData.get("income-2")) as string;
 
   const userData = {
@@ -71,6 +72,7 @@ export async function userLogin(params: UserLoginParams) {
     throw new Error("User not found");
   }
 
+  console.log("ini aes_iv login: ", user.aes_iv);
   let passwordDecrypt = decryptAES(user.password_AES as string, user.aes_iv);
   console.log(passwordDecrypt);
 
@@ -103,4 +105,16 @@ export async function getCurrentUser(token: string) {
   });
 
   return user;
+}
+
+export async function handleDecryptAES(
+  encryptedInput: string | undefined,
+  aes_iv: Buffer
+) {
+  console.log("ini aes_iv: ", aes_iv);
+  const decrypted = decryptAES(
+    encryptedInput as string,
+    Buffer.from(aes_iv)
+  ) as string;
+  return decrypted;
 }
