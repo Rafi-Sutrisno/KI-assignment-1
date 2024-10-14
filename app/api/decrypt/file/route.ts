@@ -3,8 +3,9 @@ import { createDecipheriv } from "crypto";
 
 export async function POST(req: Request) {
   try {
+    console.time("RC4 Decryption Time");
     const { encryptedBuffer } = await req.json(); // Extract encryptedInput from request body
-    const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_DES_KEY;;
+    const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_DES_KEY;
     const key = Buffer.from(encryptionKeyHex!, "hex");
     console.log("ini eB post: ", encryptedBuffer);
     if (!encryptedBuffer) {
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
     decrypted = Buffer.concat([decrypted, decipher.final()]);
 
     console.log("Decrypted data: ", decrypted);
+    console.timeEnd("RC4 Decryption Time");
     return NextResponse.json({ decrypted });
   } catch (error) {
     console.error("Decryption error:", error);

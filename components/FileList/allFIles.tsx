@@ -62,7 +62,6 @@ const AllFiles = () => {
       if (encType == "rc4") {
         encryptedBuffer = Buffer.from(data.rc4_encrypted.data);
         console.log("in eB rc4: ", encryptedBuffer);
-        // decrypted = decryptRC4(encryptedBuffer);
         try {
           const response = await fetch("/api/decrypt/file", {
             method: "POST",
@@ -85,10 +84,7 @@ const AllFiles = () => {
         blob = new Blob([decrypted], { type: data.fileType });
         url = URL.createObjectURL(blob);
         type = "RC4-";
-      }
-      
-      
-      else if (encType == "des") {
+      } else if (encType == "des") {
         encryptedBuffer = Buffer.from(data.des_encrypted.data);
         const ivDes = data.des_iv.data;
         console.log("ini ivdes all: " + ivDes);
@@ -115,9 +111,7 @@ const AllFiles = () => {
         blob = new Blob([decrypted], { type: data.fileType });
         url = URL.createObjectURL(blob);
         type = "DES-";
-      }
-      
-      else if (encType == "aes") {
+      } else if (encType == "aes") {
         encryptedBuffer = Buffer.from(data.aes_encrypted.data);
         console.log("in iv aes: ", data.aes_iv.data);
         decrypted = decryptAES(encryptedBuffer, data.aes_iv.data);

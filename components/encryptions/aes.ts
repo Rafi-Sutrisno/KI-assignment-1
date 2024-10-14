@@ -15,17 +15,18 @@ export function encryptAES(
   iv: Buffer
 ): Buffer | string {
   let cipher, encrypted;
+  console.time("AES Encryption Time");
   if (typeof input === "string") {
     cipher = createCipheriv(algorithm, key, iv);
     encrypted = cipher.update(input, "utf8", "hex");
     encrypted += cipher.final("hex");
-    return encrypted;
   } else {
     cipher = createCipheriv(algorithm, key, iv);
     encrypted = cipher.update(input);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return encrypted;
   }
+  console.timeEnd("AES Encryption Time");
+  return encrypted;
 }
 
 export function decryptAES(
@@ -33,12 +34,12 @@ export function decryptAES(
   iv: Buffer
 ): Buffer | string {
   let decipher, decrypted;
+  console.time("AES Decryption Time");
 
   if (typeof encryptedInput === "string") {
     decipher = createDecipheriv(algorithm, key, iv);
     decrypted = decipher.update(encryptedInput, "hex", "utf8");
     decrypted += decipher.final("utf8");
-    return decrypted;
   } else {
     decipher = createDecipheriv(algorithm, key, iv);
 
@@ -47,7 +48,7 @@ export function decryptAES(
 
     // Finalize decryption
     decrypted = Buffer.concat([decrypted, decipher.final()]);
-
-    return decrypted;
   }
+  console.timeEnd("AES Decryption Time");
+  return decrypted;
 }
