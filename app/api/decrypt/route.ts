@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   try {
     console.time("RC4 Decryption Time");
     const { encryptedInput } = await req.json(); // Extract encryptedInput from request body
-    const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_DES_KEY;
+    const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_RC4_KEY;
     const key = Buffer.from(encryptionKeyHex!, "hex");
 
     if (!encryptedInput) {

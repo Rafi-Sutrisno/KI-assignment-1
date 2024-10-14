@@ -112,9 +112,35 @@ const AllFiles = () => {
         url = URL.createObjectURL(blob);
         type = "DES-";
       } else if (encType == "aes") {
+        // encryptedBuffer = Buffer.from(data.aes_encrypted.data);
+        // console.log("in iv aes: ", data.aes_iv.data);
+        // decrypted = decryptAES(encryptedBuffer, data.aes_iv.data);
+        // console.log("ini aes decrypt: ", decrypted);
+        // blob = new Blob([decrypted], { type: data.fileType });
+        // url = URL.createObjectURL(blob);
+        // type = "AES-";
+
         encryptedBuffer = Buffer.from(data.aes_encrypted.data);
-        console.log("in iv aes: ", data.aes_iv.data);
-        decrypted = decryptAES(encryptedBuffer, data.aes_iv.data);
+        const ivAes = data.aes_iv.data;
+        console.log("in eB AES: ", encryptedBuffer);
+        try {
+          const response = await fetch("/api/decryptAES/file", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ encryptedBuffer, ivAes }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          res = await response.json();
+        } catch (error) {
+          console.error("Error:", error);
+        }
+        decrypted = Buffer.from(res.decrypted.data);
         console.log("ini aes decrypt: ", decrypted);
         blob = new Blob([decrypted], { type: data.fileType });
         url = URL.createObjectURL(blob);

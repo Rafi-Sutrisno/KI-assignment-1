@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv } from "crypto";
 
 const algorithm = "rc4";
-const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_DES_KEY;
+const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_RC4_KEY;
 const key = Buffer.from(encryptionKeyHex!, "hex");
 
 export function encryptRC4(input: Buffer | string): Buffer | string {
