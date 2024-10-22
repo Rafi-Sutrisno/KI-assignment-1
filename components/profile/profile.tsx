@@ -21,7 +21,10 @@ const Profile = () => {
   const [decryptedIncome, setDecryptedIncome] = useState<string | null>(null);
 
   // Function to decrypt the RC4 data and update the state
-  async function handleDecryptRC4(encryptedInput: string | undefined) {
+  async function handleDecryptRC4(
+    encryptedInput: string | undefined,
+    key_RC4: Buffer
+  ) {
     if (!isDecrypted) {
       try {
         const response = await fetch("/api/decrypt", {
@@ -29,7 +32,7 @@ const Profile = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ encryptedInput }),
+          body: JSON.stringify({ encryptedInput, key_RC4 }),
         });
 
         if (!response.ok) {
@@ -51,11 +54,29 @@ const Profile = () => {
 
   async function handleButtonAES(
     encryptedInput: string | undefined,
-    aes_iv: Buffer
+    aes_iv: Buffer,
+    key_AES: Buffer
   ) {
     if (!isDecryptedPw) {
-      const decrypted = await handleDecryptAES(encryptedInput, aes_iv);
-      setDecryptedPw(decrypted);
+      try {
+        const response = await fetch("/api/decryptAES", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ encryptedInput, aes_iv, key_AES }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("ini data: ", data);
+        setDecryptedPw(data.decrypted);
+      } catch (error) {
+        console.error("Error:", error);
+      }
     } else {
       setDecryptedPw(user!.password_AES);
     }
@@ -65,7 +86,8 @@ const Profile = () => {
 
   async function handleDecryptDES(
     encryptedInput: string | undefined,
-    ivDes: Buffer
+    ivDes: Buffer,
+    keyDes: Buffer
   ) {
     if (!isDecryptedIncome) {
       try {
@@ -74,7 +96,7 @@ const Profile = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ encryptedInput, ivDes }),
+          body: JSON.stringify({ encryptedInput, ivDes, keyDes }),
         });
 
         if (!response.ok) {
@@ -149,7 +171,11 @@ const Profile = () => {
                 </p>
                 <button
                   onClick={() =>
-                    handleButtonAES(user?.password_AES, user!.aes_iv)
+                    handleButtonAES(
+                      user?.password_AES,
+                      user!.aes_iv,
+                      user!.key_AES
+                    )
                   }
                   className=""
                 >
@@ -173,7 +199,9 @@ const Profile = () => {
                 </p>
 
                 <button
-                  onClick={() => handleDecryptRC4(user?.health_data_RC4)}
+                  onClick={() =>
+                    handleDecryptRC4(user?.health_data_RC4, user!.key_RC4)
+                  }
                   className=""
                 >
                   {isDecrypted ? (
@@ -195,7 +223,11 @@ const Profile = () => {
 
                 <button
                   onClick={() =>
-                    handleDecryptDES(user?.income_DES, user!.des_iv)
+                    handleDecryptDES(
+                      user?.income_DES,
+                      user!.des_iv,
+                      user!.key_DES
+                    )
                   }
                   className=""
                 >

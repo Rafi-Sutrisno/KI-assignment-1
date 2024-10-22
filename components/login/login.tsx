@@ -34,9 +34,9 @@ export const Login: React.FC<RegisterProps> = ({ change, setSelect }) => {
       toast.success("success to login.");
       console.log(token);
       setToken(token.token);
-    } catch (error) {
-      console.log(error);
-      toast.error("failed to login");
+    } catch (e: unknown) {
+      console.log(e);
+      if (e instanceof Error) toast.error(e.message);
     }
   };
 

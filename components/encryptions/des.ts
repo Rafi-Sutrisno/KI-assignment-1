@@ -1,12 +1,11 @@
 import { createCipheriv } from "crypto";
 
 const algorithm = "des";
-const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_DES_KEY;
-const key = Buffer.from(encryptionKeyHex!, "hex");
 
 export function encryptDES(
   input: Buffer | string,
-  iv: Buffer
+  iv: Buffer,
+  key: Buffer
 ): Buffer | string {
   let cipher, encrypted;
   console.time("DES Encryption Time");

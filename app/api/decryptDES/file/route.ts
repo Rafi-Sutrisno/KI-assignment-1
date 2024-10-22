@@ -4,10 +4,8 @@ import { createDecipheriv } from "crypto";
 export async function POST(req: Request) {
   try {
     console.time("DES Decryption Time");
-    const { encryptedBuffer, ivDes } = await req.json(); // Extract encryptedInput from request body
-    const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_DES_KEY;
-    const key = Buffer.from(encryptionKeyHex!, "hex");
-    console.log("ini des post: ", encryptedBuffer);
+    const { encryptedBuffer, ivDes, key_DES } = await req.json(); // Extract encryptedInput from request body
+
     if (!encryptedBuffer) {
       return NextResponse.json(
         { error: "No encrypted input provided." },
@@ -16,7 +14,7 @@ export async function POST(req: Request) {
     }
 
     const ivBuf = Buffer.from(ivDes);
-    const decipher = createDecipheriv("des", key, ivBuf); // No IV for RC4
+    const decipher = createDecipheriv("des", Buffer.from(key_DES.data), ivBuf); // No IV for RC4
     let decrypted = decipher.update(
       Buffer.from(new Uint8Array(encryptedBuffer.data))
     );

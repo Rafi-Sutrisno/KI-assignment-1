@@ -4,9 +4,7 @@ import { createDecipheriv } from "crypto";
 export async function POST(req: Request) {
   try {
     console.time("RC4 Decryption Time");
-    const { encryptedInput } = await req.json(); // Extract encryptedInput from request body
-    const encryptionKeyHex = process.env.NEXT_PUBLIC_ENCRYPTION_RC4_KEY;
-    const key = Buffer.from(encryptionKeyHex!, "hex");
+    const { encryptedInput, key_RC4 } = await req.json(); // Extract encryptedInput from request body
 
     if (!encryptedInput) {
       return NextResponse.json(
@@ -15,7 +13,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const decipher = createDecipheriv("rc4", key, null); // No IV for RC4
+    const decipher = createDecipheriv("rc4", Buffer.from(key_RC4.data), null); // No IV for RC4
     let decrypted = decipher.update(encryptedInput, "hex", "utf8");
     decrypted += decipher.final("utf8");
 

@@ -8,15 +8,31 @@ datasource db {
 }
 
 model User {
-  id               String      @id @default(cuid())
-  username         String      @unique
-  password_AES     String
-  aes_iv           Bytes
-  health_data_RC4  String
-  income_DES       String
-  des_iv           Bytes
+  id                String      @id @default(cuid())
+  username          String      @unique
+  password_AES      String
+  aes_iv            Bytes
+  health_data_RC4   String
+  income_DES        String
+  des_iv            Bytes
 
-  user_files   UserFiles[]
+  // Symmetric Encription Keys
+  key_AES           Bytes
+  key_RC4           Bytes
+  key_DES           Bytes
+
+  // Asymmetric key for sharing
+  publicKey         Bytes
+  privateKey        Bytes?
+
+  // Owned files
+  user_files        UserFiles[]
+
+  // Has requested file to
+  access_requests   UserAccess[]
+
+  // Has given / waiting to give access to
+  access_given      UserAccess[] @relation("UserOwnerAccess")
 }
 
 model UserFiles {
@@ -34,4 +50,19 @@ model UserFiles {
   des_iv        Bytes
   
   user          User   @relation(fields: [userId], references: [id])
+  access        UserAccess[] 
+}
+
+model UserAccess {
+  id                String @id @default(cuid())
+  user_request_id   String
+  user_owner_id     String
+  file_id           String
+  status            Int
+
+  encrypted_symmetric_key  Bytes? // this key will be encrypted by using the requesting person public key
+
+  user_request     User @relation(fields: [user_request_id], references: [id])
+  user_owner       User @relation("UserOwnerAccess", fields: [user_owner_id], references: [id])
+  file             UserFiles @relation(fields: [file_id], references: [id])
 }

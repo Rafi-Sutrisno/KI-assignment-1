@@ -1,7 +1,7 @@
 "use client";
 import { useContext, useEffect, useState } from "react";
 import Card from "./card";
-import { getFiles } from "@/actions/fileActions";
+import { getFiles, getUserKeys } from "@/actions/fileActions";
 import { Context } from "../Provider/TokenProvider";
 import { deleteFiles } from "@/actions/fileActions";
 import toast from "react-hot-toast";
@@ -9,8 +9,16 @@ import { decryptAES } from "../encryptions/aes";
 import Loading from "../loading/loading";
 // import { randomBytes } from "crypto";
 
+interface UserKeys {
+  key_AES: Buffer;
+  key_RC4: Buffer;
+  key_DES: Buffer;
+}
+
 const AllFiles = () => {
   const [files, setFiles] = useState<any[]>([]);
+  const [keys, setKeys] = useState<UserKeys>();
+
   const context = useContext(Context);
 
   const [loading, setLoading] = useState(true);
@@ -27,6 +35,8 @@ const AllFiles = () => {
       if (token) {
         try {
           const fetchedFiles = await getFiles(token);
+          const userKeys = await getUserKeys(token!);
+          setKeys(userKeys!);
           setFiles(fetchedFiles);
           setLoading(false);
         } catch (error) {
@@ -61,14 +71,14 @@ const AllFiles = () => {
     if (data) {
       if (encType == "rc4") {
         encryptedBuffer = Buffer.from(data.rc4_encrypted.data);
-        console.log("in eB rc4: ", encryptedBuffer);
+        const key_RC4 = keys?.key_RC4;
         try {
           const response = await fetch("/api/decrypt/file", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ encryptedBuffer }),
+            body: JSON.stringify({ encryptedBuffer, key_RC4 }),
           });
 
           if (!response.ok) {
@@ -87,6 +97,7 @@ const AllFiles = () => {
       } else if (encType == "des") {
         encryptedBuffer = Buffer.from(data.des_encrypted.data);
         const ivDes = data.des_iv.data;
+        const key_DES = keys?.key_DES;
         console.log("ini ivdes all: " + ivDes);
         try {
           const response = await fetch("/api/decryptDES/file", {
@@ -94,7 +105,7 @@ const AllFiles = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ encryptedBuffer, ivDes }),
+            body: JSON.stringify({ encryptedBuffer, ivDes, key_DES }),
           });
 
           if (!response.ok) {
@@ -112,16 +123,9 @@ const AllFiles = () => {
         url = URL.createObjectURL(blob);
         type = "DES-";
       } else if (encType == "aes") {
-        // encryptedBuffer = Buffer.from(data.aes_encrypted.data);
-        // console.log("in iv aes: ", data.aes_iv.data);
-        // decrypted = decryptAES(encryptedBuffer, data.aes_iv.data);
-        // console.log("ini aes decrypt: ", decrypted);
-        // blob = new Blob([decrypted], { type: data.fileType });
-        // url = URL.createObjectURL(blob);
-        // type = "AES-";
-
         encryptedBuffer = Buffer.from(data.aes_encrypted.data);
         const ivAes = data.aes_iv.data;
+        const key_AES = keys?.key_AES;
         console.log("in eB AES: ", encryptedBuffer);
         try {
           const response = await fetch("/api/decryptAES/file", {
@@ -129,7 +133,7 @@ const AllFiles = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ encryptedBuffer, ivAes }),
+            body: JSON.stringify({ encryptedBuffer, ivAes, key_AES }),
           });
 
           if (!response.ok) {

@@ -11,26 +11,60 @@ import {
 import { randomBytes } from "crypto";
 import { encryptRC4 } from "@/components/encryptions/rc4";
 import { encryptDES } from "@/components/encryptions/des";
+import { generateKeyPairSync } from "crypto";
 
 export async function createUser(formData: FormData) {
-  const iv = randomBytes(16); // put iv on each files
-  const ivDes = randomBytes(8); // put iv on each files
+  // IV and Key generating
+  const iv = randomBytes(16);
+  const ivDes = randomBytes(8);
+  const keyAES = randomBytes(32);
+  const keyRC4 = randomBytes(16);
+  const keyDES = randomBytes(8);
+
+  // Generating public and private key
+  const { publicKey, privateKey } = generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: "spki", format: "pem" },
+    privateKeyEncoding: {
+      type: "pkcs8",
+      format: "pem",
+      cipher: "aes-256-cbc",
+      passphrase: "top_secret",
+    },
+  });
+  const publicKeyBytes = Buffer.from(publicKey, "utf-8");
+  const privateKeyBytes = Buffer.from(privateKey, "utf-8");
+
+  // Format the income string
   const income = ((formData.get("income-1") as string) +
     " - " +
     formData.get("income-2")) as string;
 
   const userData = {
     username: formData.get("name") as string,
-    password_AES: encryptAES(formData.get("password") as string, iv) as string,
-    aes_iv: iv,
+
+    password_AES: encryptAES(
+      formData.get("password") as string,
+      iv,
+      keyAES
+    ) as string,
 
     health_data_RC4: encryptRC4(
-      formData.get("health_data") as string
+      formData.get("health_data") as string,
+      keyRC4
     ) as string,
-    income_DES: encryptDES(income, ivDes) as string,
 
-    // health_data_RC4: formData.get("health_data") as string,
+    income_DES: encryptDES(income, ivDes, keyDES) as string,
+
     des_iv: ivDes,
+    aes_iv: iv,
+
+    key_AES: keyAES,
+    key_RC4: keyRC4,
+    key_DES: keyDES,
+
+    publicKey: publicKeyBytes,
+    privateKey: privateKeyBytes,
   };
 
   const file = formData.get("file_input") as File;
@@ -44,14 +78,11 @@ export async function createUser(formData: FormData) {
       userId: user.id,
       fileType: file.type,
       fileName: file.name,
-      aes_encrypted: encryptAES(bufferFile, iv) as Buffer,
+      aes_encrypted: encryptAES(bufferFile, iv, keyAES) as Buffer,
+      rc4_encrypted: encryptRC4(bufferFile, keyRC4) as Buffer,
+      des_encrypted: encryptDES(bufferFile, ivDes, keyDES) as Buffer,
+
       aes_iv: iv,
-      rc4_encrypted: encryptRC4(bufferFile) as Buffer,
-      // des_encrypted: Buffer.from("testing"),
-
-      // rc4_encrypted: encryptRC4(bufferFile) as Buffer,
-      des_encrypted: encryptDES(bufferFile, ivDes) as Buffer,
-
       des_iv: ivDes,
     },
   });
@@ -73,7 +104,11 @@ export async function userLogin(params: UserLoginParams) {
   }
 
   console.log("ini aes_iv login: ", user.aes_iv);
-  let passwordDecrypt = decryptAES(user.password_AES as string, user.aes_iv);
+  const passwordDecrypt = decryptAES(
+    user.password_AES as string,
+    user.aes_iv,
+    user.key_AES
+  );
   console.log(passwordDecrypt);
 
   if (passwordDecrypt !== password) {
@@ -109,12 +144,13 @@ export async function getCurrentUser(token: string) {
 
 export async function handleDecryptAES(
   encryptedInput: string | undefined,
-  aes_iv: Buffer
+  aes_iv: Buffer,
+  key: Buffer
 ) {
-  console.log("ini aes_iv: ", aes_iv);
   const decrypted = decryptAES(
     encryptedInput as string,
-    Buffer.from(aes_iv)
+    Buffer.from(aes_iv),
+    key
   ) as string;
   return decrypted;
 }
