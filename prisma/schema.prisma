@@ -59,7 +59,8 @@ model UserAccess {
   user_owner_id     String
   file_id           String
   status            Int
-
+  method            String
+  
   encrypted_symmetric_key  Bytes? // this key will be encrypted by using the requesting person public key
 
   user_request     User @relation(fields: [user_request_id], references: [id])

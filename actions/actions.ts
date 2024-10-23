@@ -29,7 +29,7 @@ export async function createUser(formData: FormData) {
       type: "pkcs8",
       format: "pem",
       cipher: "aes-256-cbc",
-      passphrase: "top_secret",
+      passphrase: process.env.NEXT_PUBLIC_PASSPHRASE,
     },
   });
   const publicKeyBytes = Buffer.from(publicKey, "utf-8");

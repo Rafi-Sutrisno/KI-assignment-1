@@ -1,9 +1,70 @@
 "use client";
+import Loading from "@/components/loading/loading";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const AccessPage = () => {
   // State to track the active page
   const [activePage, setActivePage] = useState("request");
+  const [loading, setLoading] = useState(false);
+
+  const handleButtonRequest = async () => {
+    const userReqID = "cm2lkf3vs0000se2107fyxo6n";
+    const userOwnerID = "cm2k2a50i0000rw61obqq7fgd";
+    const fileID = "cm2k2a51a0002rw61ejsy408e";
+    const method = "AES";
+    try {
+      const response = await fetch("/api/requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userReqID, userOwnerID, fileID, method }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.message === true) {
+        toast.success("success to request file");
+      } else {
+        toast.error("failed to accept");
+      }
+      console.log("ini data: ", data.message);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleButtonAccept = async () => {
+    const status = 1;
+    const accessID = "cm2lkjgnf0004se21m106jpwt";
+
+    try {
+      setLoading(true);
+      const response = await fetch("/api/requests/set-status", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status, accessID }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("ini data: ", data.message);
+      setLoading(false);
+      toast.success("success to accept file");
+    } catch (error) {
+      console.error("Error:", error);
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="my-20 mt-28 flex min-h-[50vh] mx-48">
@@ -13,6 +74,15 @@ const AccessPage = () => {
             <h2 className="text-xl font-semibold mb-4">Request File Access</h2>
             {/* Content for Request File Access page */}
             <p>Here you can request access to another user's file.</p>
+
+            <button
+              onClick={() => {
+                handleButtonRequest();
+              }}
+              className="p-2 bg-white text-black mt-3"
+            >
+              TEST REQUEST
+            </button>
           </div>
         )}
         {activePage === "invitations" && (
@@ -23,6 +93,19 @@ const AccessPage = () => {
               Here you can view and accept requests from others to access your
               files.
             </p>
+            <button
+              onClick={() => {
+                handleButtonAccept();
+              }}
+              className="p-2 bg-white text-black mt-3"
+            >
+              TEST ACCEPT
+            </button>
+            {loading && (
+              <>
+                <Loading />
+              </>
+            )}
           </div>
         )}
         {activePage === "fileAccess" && (
