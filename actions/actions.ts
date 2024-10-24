@@ -154,3 +154,42 @@ export async function handleDecryptAES(
   ) as string;
   return decrypted;
 }
+
+export async function getAllUser(token: string) {
+  console.log("ini token: ", token);
+  const decodedToken = atob(token.split(".")[1]);
+  const jsonObject = JSON.parse(decodedToken);
+  const userId = jsonObject.id;
+  console.log(userId);
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (user) {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        _count: {
+          select: {
+            user_files: true,
+          },
+        },
+        user_files: {
+          select: {
+            id: true,
+            fileName: true,
+            fileType: true,
+            userId: true,
+          },
+        },
+      },
+    });
+
+    return users;
+  }
+  return [];
+}
