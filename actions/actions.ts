@@ -156,7 +156,6 @@ export async function handleDecryptAES(
 }
 
 export async function getAllUser(token: string) {
-  console.log("ini token: ", token);
   const decodedToken = atob(token.split(".")[1]);
   const jsonObject = JSON.parse(decodedToken);
   const userId = jsonObject.id;
@@ -192,4 +191,17 @@ export async function getAllUser(token: string) {
     return users;
   }
   return [];
+}
+
+export async function getUserAccess(user_request_id: string) {
+  const userAccess = await prisma.userAccess.findMany({
+    where: {
+      user_request_id: user_request_id,
+    },
+    select: {
+      file_id: true,
+    },
+  });
+
+  return userAccess;
 }

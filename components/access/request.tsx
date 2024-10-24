@@ -3,7 +3,7 @@ import React from "react";
 import Loading from "@/components/loading/loading";
 import { useEffect, useState, useContext } from "react";
 import toast from "react-hot-toast";
-import { getAllUser } from "@/actions/actions";
+import { getAllUser, getUserAccess } from "@/actions/actions";
 import { Context } from "../Provider/TokenProvider";
 
 interface UserFile {
@@ -26,15 +26,18 @@ const RequestPage = () => {
   const handleButtonRequest = async (
     userid: string,
     ownerId: string,
-    fileId: string
+    fileId: string,
+    selectedMethod: string
   ) => {
+    setLoadingFileId(fileId);
     console.log("ini yang request: ", userid);
     console.log("ini yang punya: ", ownerId);
     console.log("ini file nya: ", fileId);
     const userReqID = userid;
     const userOwnerID = ownerId;
     const fileID = fileId;
-    const method = "AES";
+    const method = selectedMethod;
+
     try {
       const response = await fetch("/api/requests", {
         method: "POST",
@@ -49,14 +52,21 @@ const RequestPage = () => {
       }
 
       const data = await response.json();
-      if (data.message === true) {
-        toast.success("success to request file");
+
+      // Check if the response contains the success message
+      if (data.message === "success to create initial request") {
+        setUserAccess((prevAccess) => [...prevAccess, { file_id: fileID }]);
+        toast.success("Success to request file");
       } else {
-        toast.error("failed to accept");
+        toast.error("Failed to accept");
       }
+
       console.log("ini data: ", data.message);
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      // Reset loading after the request finishes
+      setLoadingFileId(null);
     }
   };
 
@@ -70,9 +80,12 @@ const RequestPage = () => {
   const token = getToken();
 
   const [loading, setLoading] = useState(true);
+  const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [userAccess, setUserAccess] = useState<any[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [fileMethods, setFileMethods] = useState<{ [key: string]: string }>({});
 
   const [currentUsers, setCurrentUsers] = useState("");
 
@@ -98,17 +111,42 @@ const RequestPage = () => {
     fetchFiles();
   }, [token]);
 
-  const handleModalOpen = (user: any) => {
+  const handleModalOpen = async (user: any) => {
     setSelectedUser(user);
     console.log("ini selected", selectedUser);
-    setModalOpen(true);
   };
+
+  useEffect(() => {
+    if (selectedUser) {
+      const fetchUserAccess = async () => {
+        const response = await getUserAccess(currentUsers);
+        console.log("resp: ", response);
+        setUserAccess(response);
+        setModalOpen(true);
+      };
+
+      fetchUserAccess();
+    }
+  }, [selectedUser]);
 
   const handleModalClose = () => {
     setModalOpen(false);
     setSelectedUser(null);
+
+    const resetMethods: { [key: string]: string } = {};
+    selectedUser?.user_files.forEach((file: UserFile) => {
+      resetMethods[file.id] = "AES";
+    });
+
+    setFileMethods(resetMethods);
   };
 
+  const handleMethodChange = (fileId: string, method: string) => {
+    setFileMethods((prevMethods) => ({
+      ...prevMethods,
+      [fileId]: method, // Update the method for the specific file
+    }));
+  };
   return (
     <>
       {/* Modal */}
@@ -120,7 +158,7 @@ const RequestPage = () => {
           onClick={handleModalClose} // Close modal on backdrop click
         >
           <div
-            className="relative p-4 w-full max-w-2xl max-h-full"
+            className="relative p-4 w-full max-w-4xl max-h-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -152,65 +190,108 @@ const RequestPage = () => {
                 </button>
               </div>
 
-              <div className="p-4 md:p-5 space-y-4">
-                <table className="table-fixed w-full border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="w-1/12 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
-                        No
-                      </th>
-                      <th className="w-2/12 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
-                        Filename
-                      </th>
-                      <th className="w-2/12 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
-                        Filetype
-                      </th>
-                      <th className="w-2/12 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
-                        Request Access
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedUser?.user_files.map(
-                      (file: UserFile, index: number) => (
-                        <tr
-                          key={file.id} // Use file ID for a unique key
-                          className={`${
-                            index % 2 === 0
-                              ? "bg-white dark:bg-gray-800"
-                              : "bg-gray-100 dark:bg-gray-700"
-                          } border border-gray-300 dark:border-gray-600`}
-                        >
-                          <td className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-black dark:text-white">
-                            {index + 1}
-                          </td>
-                          <td className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-black dark:text-white">
-                            {file.fileName}
-                          </td>
-                          <td className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-black dark:text-white">
-                            {file.fileType}
-                          </td>
-                          <td className="px-4 py-2">
-                            <button
-                              onClick={() =>
-                                handleButtonRequest(
-                                  currentUsers,
-                                  file.userId,
-                                  file.id
-                                )
-                              }
-                              className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                              type="button"
-                            >
-                              Request Access
-                            </button>
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              {loading ? (
+                <Loading />
+              ) : (
+                <div className="p-4 md:p-5 space-y-4">
+                  <table className="table-fixed w-full border-collapse">
+                    <thead>
+                      <tr>
+                        <th className="w-1/12 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
+                          No
+                        </th>
+                        <th className="w-3/12 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
+                          Filename
+                        </th>
+                        <th className="w-2/12 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
+                          Filetype
+                        </th>
+                        <th className="w-3/12 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
+                          Request Option
+                        </th>
+                        <th className="w-3/12 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-600">
+                          Request Access
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedUser?.user_files.map(
+                        (file: UserFile, index: number) => (
+                          <tr
+                            key={file.id}
+                            className={`${
+                              index % 2 === 0
+                                ? "bg-white dark:bg-gray-800"
+                                : "bg-gray-100 dark:bg-gray-700"
+                            } border border-gray-300 dark:border-gray-600`}
+                          >
+                            <td className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-black dark:text-white">
+                              {index + 1}
+                            </td>
+                            <td className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-black dark:text-white">
+                              {file.fileName}
+                            </td>
+                            <td className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-black dark:text-white">
+                              {file.fileType}
+                            </td>
+                            <td className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-black dark:text-white">
+                              <select
+                                value={fileMethods[file.id] || "AES"} // Default to "AES" if no method is selected for this file
+                                onChange={(e) =>
+                                  handleMethodChange(file.id, e.target.value)
+                                } // Update the method for this file
+                                className="block w-full px-4 py-2 text-black dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600"
+                              >
+                                <option value="AES">AES</option>
+                                <option value="RC4">RC4</option>
+                                <option value="DES">DES</option>
+                              </select>
+                            </td>
+                            <td className="px-4 py-2 text-center">
+                              {loadingFileId === file.id &&
+                              !userAccess.some(
+                                (access) => access.file_id === file.id
+                              ) ? (
+                                <>Requesting ...</>
+                              ) : (
+                                <>
+                                  {userAccess.some(
+                                    (access) => access.file_id === file.id
+                                  ) ? (
+                                    <>
+                                      <div className="bg-red-200 p-3 rounded-md whitespace-nowrap w-fit">
+                                        <p>Already Requested</p>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <button
+                                        onClick={
+                                          () =>
+                                            handleButtonRequest(
+                                              currentUsers,
+                                              file.userId,
+                                              file.id,
+                                              fileMethods[file.id] || "AES"
+                                            ) // Pass the selected method for this file
+                                        }
+                                        className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                        type="button"
+                                      >
+                                        Request Access
+                                      </button>
+                                    </>
+                                  )}
+                                </>
+                              )}
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </div>
