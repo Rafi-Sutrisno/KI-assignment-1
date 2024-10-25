@@ -3,6 +3,7 @@ import Loading from "@/components/loading/loading";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import RequestPage from "@/components/access/request";
+import RequestList from "@/app/access/requestList"
 
 const AccessPage = () => {
   // State to track the active page
@@ -42,10 +43,12 @@ const AccessPage = () => {
       <div className="w-4/5 h-full p-8">
         {activePage === "request" && <RequestPage />}
         {activePage === "invitations" && (
+          
           <div>
+
             <h2 className="text-xl font-semibold mb-4">Access Invitations</h2>
             {/* Content for Access Invitations page */}
-            <p>
+            {/* <p>
               Here you can view and accept requests from others to access your
               files.
             </p>
@@ -56,7 +59,12 @@ const AccessPage = () => {
               className="p-2 bg-white text-black mt-3"
             >
               TEST ACCEPT
-            </button>
+            </button> */}
+
+              <RequestList />
+
+
+
             {loading && (
               <>
                 <Loading />
