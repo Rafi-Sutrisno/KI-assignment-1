@@ -307,3 +307,60 @@ export async function downloadShared(
 
   return downloaded;
 }
+
+export async function getUserAccessManager(user_owner_id: string) {
+  const userAccess = await prisma.userAccess.findMany({
+    where: {
+      user_owner_id: user_owner_id,
+    },
+    select: {
+      id: true,
+      user_request_id: true,
+      file_id: true,
+    },
+  });
+
+  const userAccessWithDetails = await Promise.all(
+    userAccess.map(async (access) => {
+      const username = await prisma.user.findUnique({
+        where: {
+          id: access.user_request_id,
+        },
+        select: {
+          username: true,
+        },
+      });
+
+      const filename = await prisma.userFiles.findUnique({
+        where: {
+          id: access.file_id,
+        },
+        select: {
+          fileName: true,
+        },
+      });
+
+      return {
+        ...access,
+        username: username?.username ?? null,
+        fileName: filename?.fileName ?? null,
+      };
+    })
+  );
+
+  return userAccessWithDetails;
+}
+
+export async function removeUserAccess(id: string) {
+  try {
+    await prisma.userAccess.delete({
+      where: {
+        id: id,
+      },
+    });
+    return { ok: true }; // Mengembalikan respons berhasil
+  } catch (error) {
+    console.error("Error deleting user access:", error);
+    return { ok: false, message: "Failed to remove user access" }; // Mengembalikan respons gagal dengan pesan error
+  }
+}

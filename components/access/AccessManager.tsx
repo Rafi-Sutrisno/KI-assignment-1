@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useEffect, useState, useContext } from "react";
+import { Context } from "../Provider/TokenProvider";
+import { getUserAccessManager, removeUserAccess } from "@/actions/actions";
+import { log } from "console";
 
 interface Access {
   id: string;
@@ -11,56 +14,67 @@ const AccessManager = () => {
   const [accessList, setAccessList] = useState<Access[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const context = useContext(Context);
+
+  if (!context) {
+    throw new Error("Context must be used within a ContextProvider");
+  }
+
+  const { getToken } = context;
+  const token = getToken();
+
   useEffect(() => {
     const fetchAccessList = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/access/get-access?userId=owner1`); // Sesuaikan dengan user ID yang login
-        const data = await response.json();
-        setAccessList(
-          data.accessList.map((access: any) => ({
-            id: access.id,
-            file_id: access.file_id,
-            requestorName: access.user_request.name, // Nama user yang request akses
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching access list:", error);
-      } finally {
-        setLoading(false);
+      if (token) {
+        try {
+          setLoading(true);
+          const decodedToken = atob(token.split(".")[1]);
+          const jsonObject = JSON.parse(decodedToken);
+          const userId = jsonObject.id;
+          const response = await getUserAccessManager(userId);
+          console.log (response);
+          setAccessList(
+            response.map((access: any) => ({
+              id: access.id, // Menggunakan file_id sebagai id
+              file_id: access.fileName,
+              requestorName: access.username, // Menggunakan username sebagai requestorName
+            }))
+          );
+        } catch (error) {
+          console.error("Error fetching access list:", error);
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
     fetchAccessList();
-  }, []);
+  }, [token]);
 
   const handleRemoveAccess = async (accessID: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/access/remove-access`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessID }),
-      });
-
+      const response = await removeUserAccess(accessID);
+  
       if (response.ok) {
         setAccessList((prevList) =>
           prevList.filter((access) => access.id !== accessID)
         );
         toast.success("Access removed successfully.");
       } else {
-        toast.error("Failed to remove access.");
+        toast.error(response.message || "Failed to remove access.");
       }
     } catch (error) {
       console.error("Error removing access:", error);
+      toast.error("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Access Manager</h2>
+      <h2 className="text-xl font-semibold mb-4"></h2>
       {loading ? (
         <p>Loading...</p>
       ) : accessList.length === 0 ? (
