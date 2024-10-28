@@ -4,6 +4,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import RequestPage from "@/components/access/request";
 import RequestList from "@/app/access/requestList"
+import AccessManager from "@/components/access/AccessManager";
+
 
 const AccessPage = () => {
   // State to track the active page
@@ -82,9 +84,8 @@ const AccessPage = () => {
         {activePage === "accessManager" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Access Manager</h2>
-            {/* Content for Access Manager page */}
-            <p>Oversee and control access permissions for files.</p>
-          </div>
+            <AccessManager /> {/* Panggil komponen AccessManager */}
+        </div>
         )}
       </div>
 
