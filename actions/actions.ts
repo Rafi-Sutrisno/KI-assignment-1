@@ -312,6 +312,7 @@ export async function getUserAccessManager(user_owner_id: string) {
   const userAccess = await prisma.userAccess.findMany({
     where: {
       user_owner_id: user_owner_id,
+      status: 1
     },
     select: {
       id: true,
