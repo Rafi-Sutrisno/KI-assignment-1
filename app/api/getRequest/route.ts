@@ -4,29 +4,36 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  
+
   const ownerId = searchParams.get("ownerId");
-  const status = searchParams.get("status");
-
-  if (!ownerId) {
-    return NextResponse.json({ error: "ID is required" }, { status: 400 });
-  }
-
-  if (!status) {
-    return NextResponse.json({ error: "status is required" }, { status: 400 });
-  }
+  const userReqId = searchParams.get("userReqId");
 
   try {
-    const result = await prisma.userAccess.findMany({
-      where: {
-        user_owner_id: String(ownerId),
-        status: Number(status)
-      },
-      include: {
-        user_request: true,
-        file: true,
-      },
-    });
+    let result;
+    if (ownerId) {
+      result = await prisma.userAccess.findMany({
+        where: {
+          user_owner_id: ownerId,
+          status: 0,
+        },
+        include: {
+          user_owner: true,
+          user_request: true,
+          file: true,
+        },
+      });
+    } else if (userReqId) {
+      result = await prisma.userAccess.findMany({
+        where: {
+          user_request_id: userReqId,
+        },
+        include: {
+          user_owner: true,
+          user_request: true,
+          file: true,
+        },
+      });
+    }
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

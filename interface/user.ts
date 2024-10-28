@@ -19,5 +19,5 @@ export interface User {
 
   // Asymmetric Keys for Sharing
   publicKey: Buffer;
-  privateKey?: Buffer | null;
+  privateKey: Buffer | null;
 }

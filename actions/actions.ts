@@ -8,10 +8,11 @@ import {
   decryptAES,
   encryptAES,
 } from "@/components/encryptions/aes";
-import { randomBytes } from "crypto";
+import { createPrivateKey, privateDecrypt, randomBytes } from "crypto";
 import { encryptRC4 } from "@/components/encryptions/rc4";
 import { encryptDES } from "@/components/encryptions/des";
 import { generateKeyPairSync } from "crypto";
+import { UserAccess } from "@/interface/user_access";
 
 export async function createUser(formData: FormData) {
   // IV and Key generating
@@ -142,6 +143,23 @@ export async function getCurrentUser(token: string) {
   return user;
 }
 
+async function getPrivateKey(token: string) {
+  const decodedToken = atob(token.split(".")[1]);
+  const jsonObject = JSON.parse(decodedToken);
+  const userId = jsonObject.id;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      privateKey: true,
+    },
+  });
+
+  return user;
+}
+
 export async function handleDecryptAES(
   encryptedInput: string | undefined,
   aes_iv: Buffer,
@@ -204,4 +222,88 @@ export async function getUserAccess(user_request_id: string) {
   });
 
   return userAccess;
+}
+
+export async function isSharedKeyCorrect(
+  sharedKey: string,
+  savedKey: { type: string; data: number[] }
+) {
+  const bufferSavedKey = Buffer.from(savedKey.data);
+  const castSavedKey = bufferSavedKey.toString("base64");
+
+  if (sharedKey === castSavedKey) return true;
+  else return false;
+}
+
+export async function downloadShared(
+  token: string,
+  sharedKey: string,
+  selected: UserAccess
+) {
+  const userPrivate = await getPrivateKey(token);
+  const method = selected.method;
+
+  const privateKey = createPrivateKey({
+    key: userPrivate?.privateKey as Buffer, // Ensure this is in PEM format
+    format: "pem",
+    type: "pkcs8", // Matches the key type when stored
+    passphrase: `${process.env.NEXT_PUBLIC_PASSPHRASE}`, // Use the correct passphrase used during key generation
+  });
+
+  const bufferShared = Buffer.from(sharedKey, "base64");
+
+  const decryptionKey = privateDecrypt(privateKey, bufferShared);
+
+  let downloaded, encryptedBuffer;
+
+  if (method === "AES") {
+    encryptedBuffer = selected.file.aes_encrypted;
+    const key_AES = decryptionKey;
+    const ivAes = selected.file.aes_iv;
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/decryptAES/file`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ encryptedBuffer, ivAes, key_AES }),
+      }
+    );
+
+    downloaded = await response.json();
+  } else if (method === "RC4") {
+    encryptedBuffer = selected.file.rc4_encrypted;
+    const key_RC4 = decryptionKey;
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/decrypt/file`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ encryptedBuffer, key_RC4 }),
+      }
+    );
+
+    downloaded = await response.json();
+  } else {
+    encryptedBuffer = selected.file.des_encrypted;
+    const key_DES = decryptionKey;
+    const ivDes = selected.file.des_iv;
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/decryptDES/file`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ encryptedBuffer, ivDes, key_DES }),
+      }
+    );
+
+    downloaded = await response.json();
+  }
+
+  return downloaded;
 }

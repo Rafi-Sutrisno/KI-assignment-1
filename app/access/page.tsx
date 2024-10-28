@@ -3,7 +3,8 @@ import Loading from "@/components/loading/loading";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import RequestPage from "@/components/access/request";
-import RequestList from "@/app/access/requestList"
+import RequestList from "@/app/access/requestList";
+import FileAccess from "@/components/access/receive";
 import AccessManager from "@/components/access/AccessManager";
 
 
@@ -45,27 +46,10 @@ const AccessPage = () => {
       <div className="w-4/5 h-full p-8">
         {activePage === "request" && <RequestPage />}
         {activePage === "invitations" && (
-          
           <div>
-
             <h2 className="text-xl font-semibold mb-4">Access Invitations</h2>
-            {/* Content for Access Invitations page */}
-            {/* <p>
-              Here you can view and accept requests from others to access your
-              files.
-            </p>
-            <button
-              onClick={() => {
-                handleButtonAccept();
-              }}
-              className="p-2 bg-white text-black mt-3"
-            >
-              TEST ACCEPT
-            </button> */}
 
-              <RequestList />
-
-
+            <RequestList />
 
             {loading && (
               <>
@@ -74,13 +58,7 @@ const AccessPage = () => {
             )}
           </div>
         )}
-        {activePage === "fileAccess" && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">File Access</h2>
-            {/* Content for File Access page */}
-            <p>Manage and view file access requests.</p>
-          </div>
-        )}
+        {activePage === "fileAccess" && <FileAccess />}
         {activePage === "accessManager" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Access Manager</h2>

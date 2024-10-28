@@ -1,48 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 interface Access {
   id: string;
-  user_request_id: string;
-  user_owner_id: string;
   file_id: string;
   requestorName: string;
-  status: number;
 }
 
 const AccessManager = () => {
-  // Dummy data
-  const [accessList, setAccessList] = useState<Access[]>([
-    {
-      id: "1",
-      user_request_id: "user1",
-      user_owner_id: "owner1",
-      file_id: "file1",
-      requestorName: "John Doe",
-      status: 1,
-    },
-    {
-      id: "2",
-      user_request_id: "user2",
-      user_owner_id: "owner1",
-      file_id: "file2",
-      requestorName: "Jane Smith",
-      status: 1,
-    },
-  ]);
+  const [accessList, setAccessList] = useState<Access[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Function to remove access from the list
-  const handleRemoveAccess = (accessID: string) => {
-    setAccessList((prevList) =>
-      prevList.filter((access) => access.id !== accessID)
-    );
-    toast.success("Access removed successfully.");
+  useEffect(() => {
+    const fetchAccessList = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/access/get-access?userId=owner1`); // Sesuaikan dengan user ID yang login
+        const data = await response.json();
+        setAccessList(
+          data.accessList.map((access: any) => ({
+            id: access.id,
+            file_id: access.file_id,
+            requestorName: access.user_request.name, // Nama user yang request akses
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching access list:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccessList();
+  }, []);
+
+  const handleRemoveAccess = async (accessID: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/access/remove-access`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessID }),
+      });
+
+      if (response.ok) {
+        setAccessList((prevList) =>
+          prevList.filter((access) => access.id !== accessID)
+        );
+        toast.success("Access removed successfully.");
+      } else {
+        toast.error("Failed to remove access.");
+      }
+    } catch (error) {
+      console.error("Error removing access:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Access Manager</h2>
-      {accessList.length === 0 ? (
+      {loading ? (
+        <p>Loading...</p>
+      ) : accessList.length === 0 ? (
         <p>No access requests found.</p>
       ) : (
         <table className="w-full text-left border">
