@@ -52,20 +52,6 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Status is required" }, { status: 400 });
   }
 
-  try {
-    await prisma.userAccess.update({
-      where: {
-        id: accessID,
-      },
-      data: {
-        status: status,
-      },
-    });
-  } catch (e: unknown) {
-    if (e instanceof Error)
-      return NextResponse.json({ error: e.message }, { status: 400 });
-  }
-
   // Generates Asymmetric
   const access = await prisma.userAccess.findUnique({
     where: {
@@ -104,15 +90,29 @@ export async function PATCH(req: Request) {
     encrypted_key = publicEncrypt(key, ownerKeys!.key_DES);
   }
 
-  let private_key;
+  try {
+    await prisma.userAccess.update({
+      where: {
+        id: accessID,
+      },
+      data: {
+        status: status,
+        encrypted_symmetric_key: encrypted_key,
+      },
+    });
+  } catch (e: unknown) {
+    if (e instanceof Error)
+      return NextResponse.json({ error: e.message }, { status: 400 });
+  }
 
+  let private_key;
   if (requestPublicKey?.privateKey) {
     try {
       private_key = createPrivateKey({
         key: requestPublicKey.privateKey, // Ensure this is in PEM format
         format: "pem",
         type: "pkcs8", // Matches the key type when stored
-        passphrase: "process.env.NEXT_PUBLIC_PASSPHRASE", // Use the correct passphrase used during key generation
+        passphrase: `${process.env.NEXT_PUBLIC_PASSPHRASE}`, // Use the correct passphrase used during key generation
       });
     } catch (err) {
       console.error("Error creating private key:", err);
@@ -122,17 +122,13 @@ export async function PATCH(req: Request) {
     throw new Error("Private key not found for the user");
   }
 
-  if (!private_key) {
-    throw new Error("Private key could not be created");
-  }
-
   // Now that we are sure private_key is defined, use it in privateDecrypt
   const decrypted_key = privateDecrypt(private_key, encrypted_key);
 
   // send the encrypted key via email
   const response = await sendMail(
     ownerUsername,
-    targetUsername,
+    "afilzag@gmail.com",
     "Your Encryption Key",
     `hello this is the key ${encrypted_key.toString(
       "base64"

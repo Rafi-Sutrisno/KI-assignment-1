@@ -5,9 +5,11 @@ import Link from "next/link";
 import { Context } from "../Provider/TokenProvider";
 import { useContext } from "react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const context = useContext(Context);
+  const router = useRouter();
 
   if (!context) {
     throw new Error("Context must be used within a ContextProvider");
@@ -22,6 +24,13 @@ const Navbar = () => {
     // window.location.reload();
   };
 
+  const handleAccessClick = (e: React.MouseEvent) => {
+    if (!getToken()) {
+      e.preventDefault();
+      router.push("/login");
+      toast.error("please login first");
+    }
+  };
   return (
     <nav className="fixed w-full z-20 top-0 start-0 border-b bg-white dark:bg-black">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -127,6 +136,7 @@ const Navbar = () => {
             <li>
               <Link
                 href={"/access"}
+                onClick={handleAccessClick}
                 className="block py-2 px-3 text-black rounded hover:bg-red-50 md:hover:bg-transparent md:hover:text-red-600 md:p-0 md:dark:hover:text-red-500 dark:text-white dark:hover:bg-red-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-red-700"
               >
                 Access Hub

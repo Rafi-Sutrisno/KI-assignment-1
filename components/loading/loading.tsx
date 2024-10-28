@@ -6,11 +6,11 @@ const Loading = () => {
       <div className="loader"></div>
       <style jsx>{`
         .loader {
-          border: 16px solid #f3f3f3; /* Light grey */
-          border-top: 16px solid black; /* Blue */
+          border: 8px solid #f3f3f3;
+          border-top: 8px solid black;
           border-radius: 50%;
-          width: 120px;
-          height: 120px;
+          width: 60px;
+          height: 60px;
           animation: spin 1.5s linear infinite;
         }
 
