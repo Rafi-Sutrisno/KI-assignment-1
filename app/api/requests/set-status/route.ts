@@ -27,6 +27,7 @@ export const sendMail = async (
     subject: subject,
     text: text,
   };
+
   console.log("ini mail", mailOptions);
 
   console.log("3");
@@ -45,7 +46,7 @@ export const sendMail = async (
 };
 
 export async function PATCH(req: Request) {
-  const { status, accessID } = await req.json();
+  const { status, accessID, ownerUsername, targetUsername } = await req.json();
 
   if (!status) {
     return NextResponse.json({ error: "Status is required" }, { status: 400 });
@@ -130,8 +131,8 @@ export async function PATCH(req: Request) {
 
   // send the encrypted key via email
   const response = await sendMail(
-    "steammbd@gmail.com",
-    "afilzag@gmail.com",
+    ownerUsername,
+    targetUsername,
     "Your Encryption Key",
     `hello this is the key ${encrypted_key.toString(
       "base64"

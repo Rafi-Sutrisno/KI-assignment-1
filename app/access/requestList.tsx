@@ -51,7 +51,7 @@ const RequestList = () => {
     fetchFiles();
   }, [token]);
 
-  const handleButtonAccept = async (accessID: string) => {
+  const handleButtonAccept = async (accessID: string, ownerUsername: string, targetUsername: string) => {
     const status = 1;
     try {
       setLoading(true);
@@ -60,7 +60,7 @@ const RequestList = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status, accessID }),
+        body: JSON.stringify({ status, accessID, ownerUsername, targetUsername }),
       });
 
       if (!response.ok) {
@@ -71,6 +71,30 @@ const RequestList = () => {
       console.log("ini data: ", data.message);
       setLoading(false);
       toast.success("success to accept file");
+    } catch (error) {
+      console.error("Error:", error);
+      setLoading(false);
+    }
+  };
+
+  const handleButtonReject = async (accessID: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/deleteRequest?requestId=${accessID}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("ini data: ", data.message);
+      setLoading(false);
+      toast.success("success to reject file");
     } catch (error) {
       console.error("Error:", error);
       setLoading(false);
@@ -128,7 +152,7 @@ const RequestList = () => {
                                     type="button"
                                     className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                                     onClick={() => {
-                                        handleButtonAccept(request.id);
+                                        handleButtonAccept(request.id, request.user_owner.username, request.user_request.username);
                                     }}
                                     >
                                     Accept
@@ -136,6 +160,9 @@ const RequestList = () => {
                                 <button
                                     type="button"
                                     className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                                    onClick={() => {
+                                      handleButtonReject(request.id);
+                                    }}
                                     >
                                      Reject
                                 </button>

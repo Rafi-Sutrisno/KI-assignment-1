@@ -23,6 +23,7 @@ export async function GET(req: Request) {
         status: Number(status)
       },
       include: {
+        user_owner: true,
         user_request: true,
         file: true,
       },
