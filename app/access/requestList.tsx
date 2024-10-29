@@ -80,6 +80,7 @@ const RequestList = () => {
       console.log("ini data: ", data.message);
       setLoading(false);
       toast.success("success to accept file");
+      window.location.reload();
     } catch (error) {
       console.error("Error:", error);
       setLoading(false);
