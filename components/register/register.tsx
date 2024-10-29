@@ -10,7 +10,6 @@ interface RegisterProps {
 }
 
 export const Register: React.FC<RegisterProps> = ({ handleSubmit }) => {
-  const [phone, setPhone] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [income1, setIncome1] = useState<number>(0);
   const [income2, setIncome2] = useState<number>(0);
@@ -31,11 +30,6 @@ export const Register: React.FC<RegisterProps> = ({ handleSubmit }) => {
     if (income > 0) {
       setIncome(income - 100);
     }
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/^0/, ""); // Remove leading 0
-    setPhone(value);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +77,24 @@ export const Register: React.FC<RegisterProps> = ({ handleSubmit }) => {
                   id="name"
                   name="name"
                   type="text"
+                  required
+                  className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Email
+              </label>
+              <div className="mt-2">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
                   required
                   className="block w-full px-3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />

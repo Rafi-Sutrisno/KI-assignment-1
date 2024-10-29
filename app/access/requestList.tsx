@@ -9,7 +9,6 @@ const RequestList = () => {
   const [requests, setRequests] = useState<any[]>([]);
 
   const context = useContext(Context);
-
   const [loading, setLoading] = useState(true);
 
   if (!context) {
@@ -38,7 +37,6 @@ const RequestList = () => {
           const data = await response.json();
           console.log("ini data: ", data.message);
           setLoading(false);
-          toast.success("success to receive requests");
 
           setRequests(data);
           setLoading(false);

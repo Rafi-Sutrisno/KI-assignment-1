@@ -43,6 +43,7 @@ export async function createUser(formData: FormData) {
 
   const userData = {
     username: formData.get("name") as string,
+    email: formData.get("email") as string,
 
     password_AES: encryptAES(
       formData.get("password") as string,
@@ -312,7 +313,7 @@ export async function getUserAccessManager(user_owner_id: string) {
   const userAccess = await prisma.userAccess.findMany({
     where: {
       user_owner_id: user_owner_id,
-      status: 1
+      status: 1,
     },
     select: {
       id: true,

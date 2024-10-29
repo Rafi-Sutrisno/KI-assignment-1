@@ -46,7 +46,7 @@ export const sendMail = async (
 };
 
 export async function PATCH(req: Request) {
-  const { status, accessID, ownerUsername, targetUsername } = await req.json();
+  const { status, accessID, ownerUsername } = await req.json();
 
   if (!status) {
     return NextResponse.json({ error: "Status is required" }, { status: 400 });
@@ -75,6 +75,7 @@ export async function PATCH(req: Request) {
       id: access?.user_request_id,
     },
     select: {
+      email: true,
       publicKey: true,
       privateKey: true,
     },
@@ -128,7 +129,7 @@ export async function PATCH(req: Request) {
   // send the encrypted key via email
   const response = await sendMail(
     ownerUsername,
-    "afilzag@gmail.com",
+    requestPublicKey.email,
     "Your Encryption Key",
     `hello this is the key ${encrypted_key.toString(
       "base64"
