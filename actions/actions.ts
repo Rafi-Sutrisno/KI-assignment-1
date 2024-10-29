@@ -43,6 +43,7 @@ export async function createUser(formData: FormData) {
 
   const userData = {
     username: formData.get("name") as string,
+    email: formData.get("email") as string,
 
     password_AES: encryptAES(
       formData.get("password") as string,
