@@ -1,11 +1,6 @@
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
-import {
-  createPrivateKey,
-  createPublicKey,
-  privateDecrypt,
-  publicEncrypt,
-} from "crypto";
+import { createPublicKey, publicEncrypt } from "crypto";
 import { createTransport } from "nodemailer";
 
 export const sendMail = async (
@@ -106,35 +101,12 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: e.message }, { status: 400 });
   }
 
-  let private_key;
-  if (requestPublicKey?.privateKey) {
-    try {
-      private_key = createPrivateKey({
-        key: requestPublicKey.privateKey, // Ensure this is in PEM format
-        format: "pem",
-        type: "pkcs8", // Matches the key type when stored
-        passphrase: `${process.env.NEXT_PUBLIC_PASSPHRASE}`, // Use the correct passphrase used during key generation
-      });
-    } catch (err) {
-      console.error("Error creating private key:", err);
-      throw new Error("Invalid private key");
-    }
-  } else {
-    throw new Error("Private key not found for the user");
-  }
-
-  // Now that we are sure private_key is defined, use it in privateDecrypt
-  const decrypted_key = privateDecrypt(private_key, encrypted_key);
-
   // send the encrypted key via email
   const response = await sendMail(
     ownerUsername,
-    requestPublicKey.email,
+    requestPublicKey!.email,
     "Your Encryption Key",
-    `hello this is the key ${encrypted_key.toString(
-      "base64"
-    )} \n\n ${ownerKeys!.key_AES.toString("base64")} \n\n 
-    ${decrypted_key.toString("base64")}`
+    `hello this is the key ${encrypted_key.toString("base64")} `
   );
 
   return NextResponse.json({ message: response });
